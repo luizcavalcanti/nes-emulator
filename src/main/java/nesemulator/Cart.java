@@ -26,6 +26,8 @@ public class Cart {
         byte[] header = Arrays.copyOfRange(romFileData, 0, 15);
         int prgROMSize = header[4] * 16 * 1024;
         int chrROMSize = header[5] * 8 * 1024;
+        System.out.println(String.format("PRG ROM size(b): %d", prgROMSize));
+        System.out.println(String.format("CHR ROM size(b): %d", chrROMSize));
 
         int prgStartByte = 16;
         int prgEndByte = prgStartByte + prgROMSize;
@@ -35,9 +37,6 @@ public class Cart {
         if (chrROMSize == 0) {
             cart.chrROM = Arrays.copyOfRange(romFileData, prgEndByte+1, prgEndByte + chrROMSize + 1);
         }
-
-        System.out.println(String.format("PRG ROM size(b): %d", prgROMSize));
-        System.out.println(String.format("CHR ROM size(b): %d", chrROMSize));
 
         return cart;
     }
