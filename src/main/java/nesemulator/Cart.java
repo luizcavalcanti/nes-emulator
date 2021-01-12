@@ -34,7 +34,7 @@ public class Cart {
 
         cart.prgROM = Arrays.copyOfRange(romFileData, prgStartByte, prgEndByte);
 
-        if (chrROMSize == 0) {
+        if (chrROMSize > 0) {
             cart.chrROM = Arrays.copyOfRange(romFileData, prgEndByte+1, prgEndByte + chrROMSize + 1);
         }
 
