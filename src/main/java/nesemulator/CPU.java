@@ -13,7 +13,6 @@ public class CPU {
     static int p;
     static int pc;
     static int s;
-    static int ps;
 
     static boolean zeroFlag;
     static boolean negativeFlag;
@@ -23,10 +22,9 @@ public class CPU {
     public static void initialize() {
         memory = new int[WHOLE_MEMORY_SIZE];
         p = PROCESSOR_STATUS_IRQ_DISABLED;
-        s = 0xFD; // Stack pointer staring into the abyss
+        s = STACK_TOP_ADDRESS; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
         a = x = y = 0x00; // Registers cleanup
-        ps = STACK_TOP_ADDRESS;
     }
 
     public static void execute(Cart cartToExecute) {
@@ -39,51 +37,51 @@ public class CPU {
             System.out.println("[" + opsCount + "]");
             int opcode = signedToUsignedByte(memory[pc]);
             switch (opcode) {
-                case 0x10:
-                    bpl();
-                    break;
-                case 0x20:
-                    jsr();
-                    break;
-                case 0x48:
-                    pha();
-                    break;
-                case 0x4C:
-                    jmpAbsolute();
-                    break;
-                case 0x84:
-                    styZeroPage();
-                    break;
-                case 0x88:
-                    dey();
-                    break;
-                case 0x8A:
-                    txa();
-                    break;
+//                case 0x10:
+//                    bpl();
+//                    break;
+//                case 0x20:
+//                    jsr();
+//                    break;
+//                case 0x48:
+//                    pha();
+//                    break;
+//                case 0x4C:
+//                    jmpAbsolute();
+//                    break;
+//                case 0x84:
+//                    styZeroPage();
+//                    break;
+//                case 0x88:
+//                    dey();
+//                    break;
+//                case 0x8A:
+//                    txa();
+//                    break;
                 case 0x8D:
                     staAbsolute();
                     break;
-                case 0x91:
-                    staIndirectIndexed();
-                    break;
-                case 0x98:
-                    tya();
-                    break;
-                case 0xA0:
-                    ldyImmediate();
-                    break;
-                case 0xA2:
-                    ldxImmediate();
-                    break;
+//                case 0x91:
+//                    staIndirectIndexed();
+//                    break;
+//                case 0x98:
+//                    tya();
+//                    break;
+//                case 0xA0:
+//                    ldyImmediate();
+//                    break;
+//                case 0xA2:
+//                    ldxImmediate();
+//                    break;
                 case 0xA9:
                     ldaImmediate();
                     break;
-                case 0xAD:
-                    ldaAbsolute();
-                    break;
-                case 0xD0:
-                    bne();
-                    break;
+//                case 0xAD:
+//                    ldaAbsolute();
+//                    break;
+//                case 0xD0:
+//                    bne();
+//                    break;
                 default:
                     System.out.printf("%06d: OPCODE $%X not implemented%n", pc, opcode);
                     running = false;
@@ -130,8 +128,8 @@ public class CPU {
 
     private static void pha() {
         // TODO: push actual value to stack
-        memory[ps] = a;
-        ps--;
+        memory[s] = a;
+        s--;
 
         System.out.printf("%06d: PHA (3 cycles)%n", pc);
 
@@ -161,8 +159,8 @@ public class CPU {
         pc += 3;
     }
 
-    private static void ldaImmediate() {
-        int value = signedToUsignedByte(memory[pc + 1]);
+    static void ldaImmediate() {
+        int value = memory[pc + 1];
         System.out.printf("%06d: LDA #$%X (2 cycles)%n", pc, value);
 
         a = value;
@@ -179,7 +177,7 @@ public class CPU {
         pc += 2;
     }
 
-    private static void staAbsolute() {
+    static void staAbsolute() {
         int value = littleEndianToInt(memory[pc + 1], memory[pc + 2]);
         System.out.printf("%06d: STA $%X (4 cycles)%n", pc, value);
 
