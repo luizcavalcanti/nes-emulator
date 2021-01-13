@@ -9,6 +9,7 @@ public class Main {
             Cart cart = Cart.fromROMFile("baloon.nes");
             System.out.println("Cart loaded");
             CPU.initialize();
+            System.out.println("CPU Initialized");
             CPU.execute(cart);
         } catch (IOException e) {
             e.printStackTrace();

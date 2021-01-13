@@ -2,6 +2,11 @@ package nesemulator;
 
 public class CPU {
 
+    private static final int INITIAL_PC = 0x8000;
+    private static final int WHOLE_MEMORY_SIZE = 0x10001;
+    private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
+    public static final int STACK_TOP_ADDRESS = 0x0200;
+
     static int a;
     static int x;
     static int y;
@@ -9,24 +14,34 @@ public class CPU {
     static int pc;
     static int s;
     static int ps;
-    static int[] memory;
-    static Cart cart;
 
+    static boolean zeroFlag;
+    static boolean negativeFlag;
+
+    static int[] memory;
 
     public static void initialize() {
-        memory = new int[0x10001]; // Whole console memory
-        a = x = y = 0x00; // Registers cleanup
-        p = 0x34; // Processos status with IRQ disabled
+        memory = new int[WHOLE_MEMORY_SIZE];
+        p = PROCESSOR_STATUS_IRQ_DISABLED;
         s = 0xFD; // Stack pointer staring into the abyss
-        pc = 0x00;
+        pc = INITIAL_PC;
+        a = x = y = 0x00; // Registers cleanup
+        ps = STACK_TOP_ADDRESS;
     }
 
     public static void execute(Cart cartToExecute) {
-        cart = cartToExecute;
+        var opsCount = 0;
+        copyCartToMemory(cartToExecute);
+
         var running = true;
         while (running) {
-            int opcode = ((int) cart.prgROM[pc]) & 0xff;
+            opsCount++;
+            System.out.println("[" + opsCount + "]");
+            int opcode = signedToUsignedByte(memory[pc]);
             switch (opcode) {
+                case 0x10:
+                    bpl();
+                    break;
                 case 0x20:
                     jsr();
                     break;
@@ -34,7 +49,13 @@ public class CPU {
                     pha();
                     break;
                 case 0x4C:
-                    jmpAbsolute(cart.prgROM[pc + 1], cart.prgROM[pc + 2]);
+                    jmpAbsolute();
+                    break;
+                case 0x84:
+                    styZeroPage();
+                    break;
+                case 0x88:
+                    dey();
                     break;
                 case 0x8A:
                     txa();
@@ -42,32 +63,66 @@ public class CPU {
                 case 0x8D:
                     staAbsolute();
                     break;
+                case 0x91:
+                    staIndirectIndexed();
+                    break;
                 case 0x98:
                     tya();
                     break;
+                case 0xA0:
+                    ldyImmediate();
+                    break;
                 case 0xA2:
-                    ldxImmediate(cart.prgROM[pc + 1]);
+                    ldxImmediate();
                     break;
                 case 0xA9:
                     ldaImmediate();
+                    break;
+                case 0xAD:
+                    ldaAbsolute();
+                    break;
+                case 0xD0:
+                    bne();
                     break;
                 default:
                     System.out.printf("%06d: OPCODE $%X not implemented%n", pc, opcode);
                     running = false;
             }
         }
+
+        System.out.printf("Program ended after %d operations run%n", opsCount);
     }
 
-    private static void ldxImmediate(byte b) {
-        int value = ((int) b) & 0xff;
+    private static void copyCartToMemory(Cart cart) {
+        int intialCartPrgROMAddress = 0x8000;
+        for (int i = 0; i < cart.prgROM.length; i++) {
+            memory[intialCartPrgROMAddress + i] = (int) cart.prgROM[i];
+        }
+    }
+
+    private static void bpl() {
+        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        var cycles = 2;
+        var offset = 2;
+        if (!negativeFlag) {
+            cycles += 1;
+            offset += memory[pc + 1];
+        }
+        System.out.printf("%06d: BPL (%d cycles)%n", pc, cycles);
+        pc += offset;
+    }
+
+    private static void ldxImmediate() {
+        int value = memory[pc + 1] & 0xff;
         System.out.printf("%06d: LDX #$%02X (2 cycles)%n", pc, value);
 
         CPU.x = value;
+        setNonPositiveFlags(x);
         pc += 2;
     }
 
-    private static void jmpAbsolute(byte addr1, byte addr2) {
-        int address = littleEndianToInt(addr1, addr2);
+    private static void jmpAbsolute() {
+        int address = littleEndianToInt(memory[pc + 1], memory[pc + 2]);
         System.out.printf("%06d: JMP $%04X (3 cycles)%n", pc, address);
 
         pc = address;
@@ -75,8 +130,8 @@ public class CPU {
 
     private static void pha() {
         // TODO: push actual value to stack
-//        ps = a;
-//        ps--;
+        memory[ps] = a;
+        ps--;
 
         System.out.printf("%06d: PHA (3 cycles)%n", pc);
 
@@ -97,37 +152,100 @@ public class CPU {
         pc += 1;
     }
 
+    private static void ldaAbsolute() {
+        int value = littleEndianToInt(memory[pc + 1], memory[pc + 2]);
+        System.out.printf("%06d: LDA $%X (4 cycles)%n", pc, value);
+
+        a = memory[value];
+        setNonPositiveFlags(a);
+        pc += 3;
+    }
+
     private static void ldaImmediate() {
-        int value = signedToUsignedByte(cart.chrROM[pc + 1]);
+        int value = signedToUsignedByte(memory[pc + 1]);
         System.out.printf("%06d: LDA #$%X (2 cycles)%n", pc, value);
 
         a = value;
+        setNonPositiveFlags(a);
+        pc += 2;
+    }
+
+    private static void ldyImmediate() {
+        int value = signedToUsignedByte(memory[pc + 1]);
+        System.out.printf("%06d: LDY #$%X (2 cycles)%n", pc, value);
+
+        y = value;
+        setNonPositiveFlags(y);
         pc += 2;
     }
 
     private static void staAbsolute() {
-        int value = littleEndianToInt(cart.chrROM[pc + 1], cart.chrROM[pc + 2]);
+        int value = littleEndianToInt(memory[pc + 1], memory[pc + 2]);
         System.out.printf("%06d: STA $%X (4 cycles)%n", pc, value);
 
         memory[value] = a;
+        pc += 3;
+    }
+
+    private static void staIndirectIndexed() {
+        int addressStart = signedToUsignedByte(memory[pc + 1]);
+        int value = littleEndianToInt(memory[addressStart], memory[addressStart + 1]);
+        System.out.printf("%06d: STA ($%X), Y (5 cycles)%n", pc, value);
+        //TODO add 1 cycle if page boundary is crossed
+
+        memory[value + y] = a;
+        pc += 2;
+    }
+
+    private static void styZeroPage() {
+        int value = signedToUsignedByte(memory[pc + 1]);
+        System.out.printf("%06d: STY $%X (3 cycles)%n", pc, value);
+
+        memory[value] = y;
         pc += 2;
     }
 
     private static void jsr() {
-        int address = littleEndianToInt(cart.chrROM[pc + 1], cart.chrROM[pc + 2]);
+        int address = littleEndianToInt(memory[pc + 1], memory[pc + 2]);
         System.out.printf("%06d: JSR $%X (6 cycles)%n", pc, address);
         // TODO: Push address-1 of the next operation to stack
 
         pc = address;
     }
 
-    private static int signedToUsignedByte(byte b) {
-        return ((int) b) & 0xff;
+    private static void dey() {
+        System.out.printf("%06d: DEY (2 cycles)%n", pc);
+
+        y--;
+        setNonPositiveFlags(y);
+
+        pc += 1;
     }
 
-    private static int littleEndianToInt(byte b1, byte b2) {
-        int i1 = ((int) b1) & 0xff;
-        int i2 = ((int) b2) & 0xff;
+    private static void bne() {
+        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        var cycles = 2;
+        var offset = 2;
+        if (!zeroFlag) {
+            cycles += 1;
+            offset += memory[pc + 1];
+        }
+        System.out.printf("%06d: BNE (%d cycles)%n", pc, cycles);
+        pc += offset;
+    }
+
+    private static int signedToUsignedByte(int b) {
+        return b & 0xff;
+    }
+
+    private static int littleEndianToInt(int b1, int b2) {
+        int i1 = b1 & 0xff;
+        int i2 = b2 & 0xff;
         return (i2 << 8) | i1;
+    }
+
+    private static void setNonPositiveFlags(int value) {
+        zeroFlag = value == 0;
+        negativeFlag = value < 0;
     }
 }
