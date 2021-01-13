@@ -7,11 +7,9 @@ import java.util.Arrays;
 
 public class Cart {
 
-    //TODO proper logging
-    
-    private byte[] prgROM;
-    private byte[] chrROM;
-//    private byte[] chrRAM; // TODO: Load CHR RAM when adequate
+    byte[] prgROM;
+    byte[] chrROM;
+    //private byte[] chrRAM; // TODO: Load CHR RAM when adequate
 
     public static Cart fromROMFile(String romFilePath) throws IOException {
         byte[] romFileData = Files.readAllBytes(Path.of(romFilePath));
@@ -35,13 +33,13 @@ public class Cart {
         cart.prgROM = Arrays.copyOfRange(romFileData, prgStartByte, prgEndByte);
 
         if (chrROMSize > 0) {
-            cart.chrROM = Arrays.copyOfRange(romFileData, prgEndByte+1, prgEndByte + chrROMSize + 1);
+            cart.chrROM = Arrays.copyOfRange(romFileData, prgEndByte + 1, prgEndByte + chrROMSize + 1);
         }
 
         return cart;
     }
 
     private static boolean isNes10Format(byte[] fileData) {
-        return fileData[0] == 'N' && fileData[1] == 'E'&& fileData[2] == 'S'&& fileData[3] == 0x1A;
+        return fileData[0] == 'N' && fileData[1] == 'E' && fileData[2] == 'S' && fileData[3] == 0x1A;
     }
 }
