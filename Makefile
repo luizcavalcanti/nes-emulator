@@ -4,6 +4,9 @@ build:
 test:
 	mvn test
 
+ci-test:
+	mvn --batch-mode --update-snapshots verify
+
 clean:
 	mvn clean
 
