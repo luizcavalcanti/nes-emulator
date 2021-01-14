@@ -105,6 +105,9 @@ public class CPU {
                 case 0xD8:
                     cld();
                     break;
+                case 0xDD:
+                    cmpAbsoluteX();
+                    break;
                 case 0xE8:
                     inx();
                     break;
@@ -138,7 +141,7 @@ public class CPU {
 
     static void ldxImmediate() {
         int value = MMU.readAddress(pc + 1);
-        System.out.printf("%06d: LDX #$%02X (2 cycles)%n", pc, value);
+        System.out.printf("%06d: LDX #$%X (2 cycles)%n", pc, value);
 
         CPU.x = value;
         setNonPositiveFlags(x);
@@ -177,7 +180,7 @@ public class CPU {
 
     static void ldaAbsolute() {
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        System.out.printf("%06d: LDA $%X (4 cycles)%n", pc, value);
+        System.out.printf("%06d: LDA $%04X (4 cycles)%n", pc, value);
 
         a = MMU.readAddress(value);
         setNonPositiveFlags(a);
@@ -186,7 +189,7 @@ public class CPU {
 
     static void ldaAbsoluteX() {
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        System.out.printf("%06d: LDA $%X, X (4 cycles)%n", pc, value);
+        System.out.printf("%06d: LDA $%04X, X (4 cycles)%n", pc, value);
 
         a = MMU.readAddress(value + x);
         setNonPositiveFlags(a);
@@ -213,7 +216,7 @@ public class CPU {
 
     static void staAbsolute() {
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        System.out.printf("%06d: STA $%X (4 cycles)%n", pc, value);
+        System.out.printf("%06d: STA $%04X (4 cycles)%n", pc, value);
 
         MMU.writeAddress(value, a);
         pc += 3;
@@ -222,7 +225,7 @@ public class CPU {
     private static void staIndirectIndexed() {
         int addressStart = signedToUsignedByte(MMU.readAddress(pc + 1));
         int value = littleEndianToInt(MMU.readAddress(addressStart), MMU.readAddress(addressStart + 1));
-        System.out.printf("%06d: STA ($%X), Y (5 cycles)%n", pc, value);
+        System.out.printf("%06d: STA ($%04X), Y (5 cycles)%n", pc, value);
         //TODO add 1 cycle if page boundary is crossed
 
         MMU.writeAddress(value + y, a);
@@ -247,7 +250,7 @@ public class CPU {
 
     private static void jsr() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        System.out.printf("%06d: JSR $%X (6 cycles)%n", pc, address);
+        System.out.printf("%06d: JSR $%04X (6 cycles)%n", pc, address);
         // TODO: Push address-1 of the next operation to stack
 
         pc = address;
@@ -310,6 +313,26 @@ public class CPU {
         }
 
         pc += 2;
+    }
+
+    static void cmpAbsoluteX() {
+        // TODO: add +1 to cycle if page is crossed
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        System.out.printf("%06d: CMP $%04X, X (4 cycles)%n", pc, address);
+
+        var value = MMU.readAddress(address + x);
+
+        var result = CPU.a - value;
+        if (result > 0) {
+            carryFlag = true;
+        } else if (result == 0) {
+            carryFlag = true;
+            zeroFlag = true;
+        } else {
+            negativeFlag = true;
+        }
+
+        pc += 3;
     }
 
     private static int signedToUsignedByte(int b) {

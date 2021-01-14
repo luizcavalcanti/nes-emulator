@@ -437,4 +437,67 @@ class CPUTest {
         assertTrue(CPU.negativeFlag);
         assertEquals(0x02, CPU.pc);
     }
+
+    @Test
+    void cmpAbsoluteXSetCarryFlagWhenAbsoluteOffsetValueIsSmallerThanA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+
+        // offset
+        CPU.x = 0x03;
+        // address without offset
+        MMU.writeAddress(0x01, 0x03);
+        MMU.writeAddress(0x02, 0x00);
+        // actual value
+        MMU.writeAddress(0x06, 0x08);
+
+        CPU.cmpAbsoluteX();
+
+        assertTrue(CPU.carryFlag);
+        assertFalse(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
+    void cmpAbsoluteXMustSetZeroAndCarryFlagsWhenAbsoluteOffsetValueIsEqualToA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+
+        // offset
+        CPU.x = 0x03;
+        // address without offset
+        MMU.writeAddress(0x01, 0x03);
+        MMU.writeAddress(0x02, 0x00);
+        // actual value
+        MMU.writeAddress(0x06, 0x09);
+
+        CPU.cmpAbsoluteX();
+
+        assertTrue(CPU.carryFlag);
+        assertTrue(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
+    void cmpAbsoluteXMustSetNegativeFlagWhenAbsoluteOffsetValueIsBiggerThanA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+
+        // offset
+        CPU.x = 0x03;
+        // address without offset
+        MMU.writeAddress(0x01, 0x03);
+        MMU.writeAddress(0x02, 0x00);
+        // actual value
+        MMU.writeAddress(0x06, 0x0F);
+
+        CPU.cmpAbsoluteX();
+
+        assertFalse(CPU.carryFlag);
+        assertFalse(CPU.zeroFlag);
+        assertTrue(CPU.negativeFlag);
+        assertEquals(0x03, CPU.pc);
+    }
 }
