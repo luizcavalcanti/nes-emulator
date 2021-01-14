@@ -522,4 +522,43 @@ class CPUTest {
         assertTrue(CPU.negativeFlag);
         assertEquals(0x03, CPU.pc);
     }
+
+    @Test
+    void dexMustDecrementRegisterXBy1() {
+        CPU.x = 0x09;
+        CPU.pc = 0x00;
+
+        CPU.dex();
+
+        assertEquals(0x08, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void dexMustDecrementRegisterXBy1AndSetZeroFlagIfNewXIsZero() {
+        CPU.x = 0x01;
+        CPU.pc = 0x00;
+
+        CPU.dex();
+        assertEquals(0x00, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertTrue(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void dexMustDecrementRegisterXBy1AndSetNegativeFlagIfNewXIsNegative() {
+        CPU.x = 0x00;
+        CPU.pc = 0x00;
+
+        CPU.dex();
+
+        assertEquals(-1, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertTrue(CPU.negativeFlag);
+    }
+
 }

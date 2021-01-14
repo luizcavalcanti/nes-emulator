@@ -99,6 +99,9 @@ public class CPU {
                 case 0xC0:
                     cpyImmediate();
                     break;
+                case 0xCA:
+                    dex();
+                    break;
                 case 0xD0:
                     bne();
                     break;
@@ -295,6 +298,14 @@ public class CPU {
         System.out.printf("%06d: INX (2 cycles)%n", pc);
 
         x++;
+        setNonPositiveFlags(x);
+        pc += 1;
+    }
+
+    static void dex() {
+        System.out.printf("%06d: DEX (2 cycles)%n", pc);
+
+        x--;
         setNonPositiveFlags(x);
         pc += 1;
     }
