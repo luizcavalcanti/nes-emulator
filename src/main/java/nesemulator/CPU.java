@@ -91,9 +91,11 @@ public class CPU {
                 case 0xAD:
                     ldaAbsolute();
                     break;
-//                case 0xD0:
-//                    bne();
-//                    break;
+                case 0xBD:
+                    ldaAbsoluteX();
+                case 0xD0:
+                    bne();
+                    break;
                 case 0xD8:
                     cld();
                     break;
@@ -176,6 +178,15 @@ public class CPU {
         pc += 3;
     }
 
+    static void ldaAbsoluteX() {
+        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        System.out.printf("%06d: LDA $%X, X (4 cycles)%n", pc, value);
+
+        a = MMU.readAddress(value + x);
+        setNonPositiveFlags(a);
+        pc += 3;
+    }
+
     static void ldaImmediate() {
         int value = MMU.readAddress(pc + 1);
         System.out.printf("%06d: LDA #$%X (2 cycles)%n", pc, value);
@@ -245,7 +256,7 @@ public class CPU {
         pc += 1;
     }
 
-    private static void bne() {
+    static void bne() {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;

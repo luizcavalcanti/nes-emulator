@@ -179,7 +179,6 @@ class CPUTest {
 
     @Test
     void bplMustMoveProgramCountByGivenOffsetIfNegativeFlagIsUnset() {
-        CPU.a = 0x00;
         CPU.pc = 0x00;
         CPU.negativeFlag = false;
 
@@ -192,7 +191,6 @@ class CPUTest {
 
     @Test
     void bplMustMoveProgramCountBy2IfNegativeFlagIsSet() {
-        CPU.a = 0x00;
         CPU.pc = 0x00;
         CPU.negativeFlag = true;
 
@@ -314,6 +312,87 @@ class CPUTest {
         CPU.inx();
         assertEquals(0x02, CPU.x);
         assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void bneMustMoveProgramCountByGivenOffsetIfZeroFlagIsUnset() {
+        CPU.pc = 0x00;
+        CPU.zeroFlag = false;
+
+        MMU.writeAddress(0x01, 0x30);
+
+        CPU.bne();
+
+        assertEquals(0x32, CPU.pc);
+    }
+
+    @Test
+    void bneMustMoveProgramCountBy2IfZeroFlagIsSet() {
+        CPU.pc = 0x00;
+        CPU.zeroFlag = true;
+
+        MMU.writeAddress(0x01, 0x30);
+
+        CPU.bne();
+
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void ldaAbsoluteXMustLoadUnsignedValueFromMemoryPositionOffsetByXToRegisterA() {
+        var value = 0xFD;
+        CPU.a = 0x00;
+        CPU.x = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        CPU.ldaAbsoluteX();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void ldaAbsoluteXMustSetZeroFlagIfValueLoadedToRegisterAIsZero() {
+        var value = 0x00;
+        CPU.a = 0x00;
+        CPU.x = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        CPU.ldaAbsoluteX();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertTrue(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void ldaAbsoluteXMustSetNegativeFlagIfValueLoadedToRegisterAIsNegative() {
+        var value = -60;
+        CPU.a = 0x00;
+        CPU.x = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        CPU.ldaAbsoluteX();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertTrue(CPU.negativeFlag);
     }
 
 }
