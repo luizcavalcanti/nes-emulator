@@ -287,4 +287,19 @@ class CPUTest {
         assertEquals(0x01, CPU.pc);
     }
 
+    @Test
+    void staZeroPageXMustStoreRegisterAContentIntoMemoryAddressOffsetByX() {
+        CPU.x = 0x03;
+        CPU.a = 0xAB;
+
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, 0x30);
+        MMU.writeAddress(0x33, 0);
+
+        CPU.staZeroPageX();
+
+        assertEquals(0xAB, MMU.readAddress(0x33));
+        assertEquals(0x02, CPU.pc);
+    }
+
 }

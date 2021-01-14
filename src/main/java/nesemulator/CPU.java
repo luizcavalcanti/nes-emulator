@@ -71,12 +71,15 @@ public class CPU {
 //                case 0x91:
 //                    staIndirectIndexed();
 //                    break;
-                case 0x9A:
-                    txs();
+                case 0x95:
+                    staZeroPageX();
                     break;
 //                case 0x98:
 //                    tya();
 //                    break;
+                case 0x9A:
+                    txs();
+                    break;
 //                case 0xA0:
 //                    ldyImmediate();
 //                    break;
@@ -212,6 +215,14 @@ public class CPU {
         System.out.printf("%06d: STY $%X (3 cycles)%n", pc, value);
 
         MMU.writeAddress(value, y);
+        pc += 2;
+    }
+
+    static void staZeroPageX() {
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
+        System.out.printf("%06d: STA $%X, X (4 cycles)%n", pc, address);
+
+        MMU.writeAddress(address + CPU.x, CPU.a);
         pc += 2;
     }
 
