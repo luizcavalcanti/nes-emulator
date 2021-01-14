@@ -274,4 +274,17 @@ class CPUTest {
         assertTrue(CPU.zeroFlag);
     }
 
+    @Test
+    void txsMustSetXValueToStackPointer() {
+        CPU.x = 0x00AA;
+        CPU.s = 0x0200;
+        CPU.pc = 0x00;
+
+        CPU.txs();
+
+        assertEquals(0x00AA, CPU.x);
+        assertEquals(0x00AA, CPU.s);
+        assertEquals(0x01, CPU.pc);
+    }
+
 }

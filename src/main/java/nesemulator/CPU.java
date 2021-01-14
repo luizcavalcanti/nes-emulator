@@ -71,9 +71,9 @@ public class CPU {
 //                case 0x91:
 //                    staIndirectIndexed();
 //                    break;
-//                case 0x9A:
-//                    txs();
-//                    break;
+                case 0x9A:
+                    txs();
+                    break;
 //                case 0x98:
 //                    tya();
 //                    break;
@@ -248,6 +248,13 @@ public class CPU {
         System.out.printf("%06d: CLD (2 cycles)%n", pc);
 
         decimalFlag = false;
+        pc += 1;
+    }
+
+    static void txs() {
+        System.out.printf("%06d: TXS (2 cycles)%n", pc);
+
+        CPU.s = CPU.x;
         pc += 1;
     }
 
