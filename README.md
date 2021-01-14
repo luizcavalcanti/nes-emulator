@@ -1,3 +1,5 @@
+![Unit Tests](https://github.com/luizcavalcanti/nes-emulator/workflows/Unit Tests/badge.svg)
+
 # NES Emulator
 
 I have some trouble understanding how the NES hardware
