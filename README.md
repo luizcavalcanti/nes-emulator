@@ -13,7 +13,7 @@ in java 11 (because reasons).
 
 ### What I'm working on right now?
 
-- Undesrtanding why Tetris falls into a death spiral of DEY-BNE-STA loops
+- Implementing memory management and interaction between CPU and a fake PPU
 
 ### Parking lot
 
