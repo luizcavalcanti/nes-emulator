@@ -1,4 +1,4 @@
-![Unit Tests](https://github.com/luizcavalcanti/nes-emulator/workflows/Unit Tests/badge.svg)
+![Unit Tests](https://github.com/luizcavalcanti/nes-emulator/workflows/Unit%20Tests/badge.svg)
 
 # NES Emulator
 
