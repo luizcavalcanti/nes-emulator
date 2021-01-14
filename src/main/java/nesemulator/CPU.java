@@ -6,7 +6,6 @@ public class CPU {
     private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
     public static final int STACK_TOP_ADDRESS = 0x0200;
 
-
     static int a;
     static int x;
     static int y;
@@ -14,6 +13,7 @@ public class CPU {
     static int pc;
     static int s;
 
+    static boolean carryFlag;
     static boolean decimalFlag;
     static boolean interruptFlag;
     static boolean negativeFlag;
@@ -27,6 +27,8 @@ public class CPU {
         s = STACK_TOP_ADDRESS; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
         a = x = y = 0x00; // Registers cleanup
+        carryFlag = false;
+        decimalFlag = false;
         zeroFlag = false;
         negativeFlag = false;
         interruptFlag = false;
@@ -93,6 +95,10 @@ public class CPU {
                     break;
                 case 0xBD:
                     ldaAbsoluteX();
+                    break;
+                case 0xC0:
+                    cpyImmediate();
+                    break;
                 case 0xD0:
                     bne();
                     break;
@@ -287,6 +293,23 @@ public class CPU {
 
         CPU.x++;
         pc += 1;
+    }
+
+    static void cpyImmediate() {
+        int value = MMU.readAddress(pc + 1);
+        System.out.printf("%06d: CPY #$%X (2 cycles)%n", pc, value);
+
+        var result = CPU.y - value;
+        if (result > 0) {
+            carryFlag = true;
+        } else if (result == 0) {
+            carryFlag = true;
+            zeroFlag = true;
+        } else {
+            negativeFlag = true;
+        }
+
+        pc += 2;
     }
 
     private static int signedToUsignedByte(int b) {

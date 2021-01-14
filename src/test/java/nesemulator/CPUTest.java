@@ -31,6 +31,7 @@ class CPUTest {
 
     @Test
     void initializeMustCleanFlags() {
+        assertFalse(CPU.carryFlag);
         assertFalse(CPU.decimalFlag);
         assertFalse(CPU.interruptFlag);
         assertFalse(CPU.negativeFlag);
@@ -395,4 +396,45 @@ class CPUTest {
         assertTrue(CPU.negativeFlag);
     }
 
+    @Test
+    void cpyImmediateMustSetCarryFlagWhenImmediateValueIsSmallerThanY() {
+        CPU.pc = 0x00;
+        CPU.y = 0x09;
+        MMU.writeAddress(0x01, 0x08);
+
+        CPU.cpyImmediate();
+
+        assertTrue(CPU.carryFlag);
+        assertFalse(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void cpyImmediateMustSetZeroAndCarryFlagsWhenImmediateValueIsEqualToY() {
+        CPU.pc = 0x00;
+        CPU.y = 0x09;
+        MMU.writeAddress(0x01, 0x09);
+
+        CPU.cpyImmediate();
+
+        assertTrue(CPU.carryFlag);
+        assertTrue(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void cpyImmediateMustSetNegativeFlagWhenImmediateValueIsBiggerThanY() {
+        CPU.pc = 0x00;
+        CPU.y = 0x09;
+        MMU.writeAddress(0x01, 0x0F);
+
+        CPU.cpyImmediate();
+
+        assertFalse(CPU.carryFlag);
+        assertFalse(CPU.zeroFlag);
+        assertTrue(CPU.negativeFlag);
+        assertEquals(0x02, CPU.pc);
+    }
 }
