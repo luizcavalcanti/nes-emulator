@@ -38,7 +38,6 @@ public class CPU {
         var running = true;
         while (running) {
             opsCount++;
-            System.out.println("[" + opsCount + "]");
             int opcode = signedToUsignedByte(MMU.readAddress(pc));
             switch (opcode) {
                 case 0x10:
@@ -98,8 +97,11 @@ public class CPU {
                 case 0xD8:
                     cld();
                     break;
+                case 0xE8:
+                    inx();
+                    break;
                 default:
-                    System.out.printf("%06d: OPCODE $%X not implemented%n", pc, opcode);
+                    System.out.printf("%06d: OpCode $%X not implemented%n", pc, opcode);
                     running = false;
             }
         }
@@ -266,6 +268,13 @@ public class CPU {
         System.out.printf("%06d: TXS (2 cycles)%n", pc);
 
         CPU.s = CPU.x;
+        pc += 1;
+    }
+
+    static void inx() {
+        System.out.printf("%06d: INX (2 cycles)%n", pc);
+
+        CPU.x++;
         pc += 1;
     }
 

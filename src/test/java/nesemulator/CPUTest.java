@@ -302,4 +302,18 @@ class CPUTest {
         assertEquals(0x02, CPU.pc);
     }
 
+    @Test
+    void inxMustIncrementRegisterXBy1() {
+        CPU.x = 0x00;
+        CPU.pc = 0x00;
+
+        CPU.inx();
+        assertEquals(0x01, CPU.x);
+        assertEquals(0x01, CPU.pc);
+
+        CPU.inx();
+        assertEquals(0x02, CPU.x);
+        assertEquals(0x02, CPU.pc);
+    }
+
 }
