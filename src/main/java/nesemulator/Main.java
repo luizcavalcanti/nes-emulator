@@ -6,11 +6,17 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            Cart cart = Cart.fromROMFile("baloon.nes");
+            String romFileName = "baloon.nes";
+
+            System.out.printf("Loading %s...%n", romFileName);
+            Cart cart = Cart.fromROMFile(romFileName);
+            MMU.loadCart(cart);
             System.out.println("Cart loaded");
+
+            System.out.println("Initializing CPU...");
             CPU.initialize();
-            System.out.println("CPU Initialized");
-            CPU.execute(cart);
+            System.out.println("Executing...");
+            CPU.execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
