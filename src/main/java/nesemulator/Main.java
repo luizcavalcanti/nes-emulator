@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            String romFileName = "baloon.nes";
+            String romFileName = "balloon.nes";
 
             System.out.printf("Loading %s...%n", romFileName);
             Cart cart = Cart.fromROMFile(romFileName);

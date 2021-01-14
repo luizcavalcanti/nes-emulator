@@ -14,6 +14,7 @@ in java 11 (because reasons).
 ### What I'm working on right now?
 
 - Implementing memory management and interaction between CPU and a fake PPU
+- MORE OPCODES! (at least enough to run Balloon Fighter)
 
 ### Parking lot
 
