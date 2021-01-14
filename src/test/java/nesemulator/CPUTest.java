@@ -303,16 +303,38 @@ class CPUTest {
 
     @Test
     void inxMustIncrementRegisterXBy1() {
-        CPU.x = 0x00;
+        CPU.x = 0x09;
         CPU.pc = 0x00;
 
         CPU.inx();
-        assertEquals(0x01, CPU.x);
+        assertEquals(0x0A, CPU.x);
         assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void inxMustIncrementRegisterXBy1AndSetZeroFlagIfNewXIsZero() {
+        CPU.x = -1;
+        CPU.pc = 0x00;
 
         CPU.inx();
-        assertEquals(0x02, CPU.x);
-        assertEquals(0x02, CPU.pc);
+        assertEquals(0x00, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertTrue(CPU.zeroFlag);
+        assertFalse(CPU.negativeFlag);
+    }
+
+    @Test
+    void inxMustIncrementRegisterXBy1AndSetNegativeFlagIfNewXIsNegative() {
+        CPU.x = -2;
+        CPU.pc = 0x00;
+
+        CPU.inx();
+        assertEquals(-1, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.zeroFlag);
+        assertTrue(CPU.negativeFlag);
     }
 
     @Test

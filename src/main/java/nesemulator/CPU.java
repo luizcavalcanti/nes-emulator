@@ -287,14 +287,15 @@ public class CPU {
     static void txs() {
         System.out.printf("%06d: TXS (2 cycles)%n", pc);
 
-        CPU.s = CPU.x;
+        s = x;
         pc += 1;
     }
 
     static void inx() {
         System.out.printf("%06d: INX (2 cycles)%n", pc);
 
-        CPU.x++;
+        x++;
+        setNonPositiveFlags(x);
         pc += 1;
     }
 
