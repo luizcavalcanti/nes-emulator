@@ -5,6 +5,7 @@ public class CPU {
     public static final int OPCODE_BRK = 0x00;
     public static final int OPCODE_BPL = 0x10;
     public static final int OPCODE_JSR = 0x20;
+    public static final int OPCODE_BMI = 0x30;
     public static final int OPCODE_PHA = 0x48;
     public static final int OPCODE_JMP_ABSOLUTE = 0x4C;
     public static final int OPCODE_SEI = 0x78;
@@ -53,7 +54,7 @@ public class CPU {
 
     public static void initialize() {
         s = STACK_TOP_ADDRESS; // Stack pointer staring into the abyss
-        pc = 0x00;
+        pc = INITIAL_PC;
         a = x = y = p = 0x00; // Registers cleanup
     }
 
@@ -70,6 +71,9 @@ public class CPU {
                     break;
                 case OPCODE_BPL:
                     bpl();
+                    break;
+                case OPCODE_BMI:
+                    bmi();
                     break;
 //                case OPCODE_JSR:
 //                    jsr();
@@ -149,7 +153,7 @@ public class CPU {
         System.out.printf("Program ended after %d operations run%n", opsCount);
     }
 
-    static boolean getStatusFlag(int flagIndex) {
+    static boolean isStatusFlagSet(int flagIndex) {
         return (p & (1 << (flagIndex))) > 0;
     }
 
@@ -161,11 +165,23 @@ public class CPU {
         p &= ~(1 << flagIndex);
     }
 
+    static void bmi() {
+        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        var cycles = 2;
+        var offset = 2;
+        if (isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
+            cycles += 1;
+            offset += MMU.readAddress(pc + 1);
+        }
+        System.out.printf("%06d: BMI (%d cycles)%n", pc, cycles);
+        pc += offset;
+    }
+
     static void bpl() {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
-        if (!getStatusFlag(STATUS_FLAG_NEGATIVE)) {
+        if (!isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
@@ -310,7 +326,7 @@ public class CPU {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
-        if (!getStatusFlag(STATUS_FLAG_ZERO)) {
+        if (!isStatusFlagSet(STATUS_FLAG_ZERO)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }

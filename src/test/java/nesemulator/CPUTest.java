@@ -64,8 +64,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -78,8 +78,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -92,8 +92,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -125,8 +125,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -143,8 +143,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -161,8 +161,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -190,16 +190,40 @@ class CPUTest {
     }
 
     @Test
+    void bmiMustMoveProgramCountByGivenOffsetIfNegativeFlagIsSet() {
+        CPU.pc = 0x00;
+        CPU.setStatusFlag(CPU.STATUS_FLAG_NEGATIVE);
+
+        MMU.writeAddress(0x01, 0x30);
+
+        CPU.bmi();
+
+        assertEquals(0x32, CPU.pc);
+    }
+
+    @Test
+    void bmiMustMoveProgramCountBy2IfNegativeFlagIsUnset() {
+        CPU.pc = 0x00;
+        CPU.unsetStatusFlag(CPU.STATUS_FLAG_NEGATIVE);
+
+        MMU.writeAddress(0x01, 0x30);
+
+        CPU.bmi();
+
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
     void seiMustSetInterruptFlag() {
         CPU.pc = 0x00;
 
         CPU.sei();
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_INTERRUPT));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
         CPU.sei();
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_INTERRUPT));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -209,12 +233,12 @@ class CPUTest {
         CPU.setStatusFlag(CPU.STATUS_FLAG_DECIMAL);
 
         CPU.cld();
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_DECIMAL));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
         CPU.cld();
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_DECIMAL));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -228,8 +252,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -242,8 +266,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -256,8 +280,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -296,8 +320,8 @@ class CPUTest {
         CPU.inx();
         assertEquals(0x0A, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -308,8 +332,8 @@ class CPUTest {
         CPU.inx();
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -320,8 +344,8 @@ class CPUTest {
         CPU.inx();
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -364,8 +388,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -383,8 +407,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -402,8 +426,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -414,9 +438,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -428,9 +452,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -442,9 +466,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -463,9 +487,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -484,9 +508,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -505,9 +529,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -520,8 +544,8 @@ class CPUTest {
 
         assertEquals(0x08, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -532,8 +556,8 @@ class CPUTest {
         CPU.dex();
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -545,8 +569,8 @@ class CPUTest {
 
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -562,10 +586,10 @@ class CPUTest {
 
         CPU.brk();
 
-        assertEquals(oldStackPointer-2, CPU.s);
+        assertEquals(oldStackPointer - 2, CPU.s);
         assertEquals(CPU.p, MMU.readAddress(CPU.s));
-        assertEquals(oldProgramCounter, MMU.readAddress(CPU.s+1));
+        assertEquals(oldProgramCounter, MMU.readAddress(CPU.s + 1));
         assertEquals(0xABCD, CPU.pc);
-        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_BREAK));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_BREAK));
     }
 }
