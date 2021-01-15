@@ -64,8 +64,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -78,8 +78,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -92,8 +92,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -125,8 +125,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -143,8 +143,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -161,14 +161,14 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
     void bplMustMoveProgramCountByGivenOffsetIfNegativeFlagIsUnset() {
         CPU.pc = 0x00;
-        CPU.unsetProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG);
+        CPU.unsetStatusFlag(CPU.STATUS_FLAG_NEGATIVE);
 
         MMU.writeAddress(0x01, 0x30);
 
@@ -180,7 +180,7 @@ class CPUTest {
     @Test
     void bplMustMoveProgramCountBy2IfNegativeFlagIsSet() {
         CPU.pc = 0x00;
-        CPU.setProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG);
+        CPU.setStatusFlag(CPU.STATUS_FLAG_NEGATIVE);
 
         MMU.writeAddress(0x01, 0x30);
 
@@ -194,27 +194,27 @@ class CPUTest {
         CPU.pc = 0x00;
 
         CPU.sei();
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_INTERRUPT_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
         CPU.sei();
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_INTERRUPT_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x02, CPU.pc);
     }
 
     @Test
     void cldMustClearDecimalFlag() {
         CPU.pc = 0x00;
-        CPU.setProcessorStatusFlag(CPU.STATUS_REGISTER_DECIMAL_FLAG);
+        CPU.setStatusFlag(CPU.STATUS_FLAG_DECIMAL);
 
         CPU.cld();
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_DECIMAL_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
         CPU.cld();
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_DECIMAL_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -228,8 +228,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -242,8 +242,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -256,8 +256,8 @@ class CPUTest {
 
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
     }
 
     @Test
@@ -296,8 +296,8 @@ class CPUTest {
         CPU.inx();
         assertEquals(0x0A, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -308,8 +308,8 @@ class CPUTest {
         CPU.inx();
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -320,14 +320,14 @@ class CPUTest {
         CPU.inx();
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
     void bneMustMoveProgramCountByGivenOffsetIfZeroFlagIsUnset() {
         CPU.pc = 0x00;
-        CPU.unsetProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG);
+        CPU.unsetStatusFlag(CPU.STATUS_FLAG_ZERO);
 
 
         MMU.writeAddress(0x01, 0x30);
@@ -340,7 +340,7 @@ class CPUTest {
     @Test
     void bneMustMoveProgramCountBy2IfZeroFlagIsSet() {
         CPU.pc = 0x00;
-        CPU.setProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG);
+        CPU.setStatusFlag(CPU.STATUS_FLAG_ZERO);
 
         MMU.writeAddress(0x01, 0x30);
 
@@ -364,8 +364,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -383,8 +383,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -402,8 +402,8 @@ class CPUTest {
 
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -414,9 +414,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -428,9 +428,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -442,9 +442,9 @@ class CPUTest {
 
         CPU.cpyImmediate();
 
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
     }
 
@@ -463,9 +463,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -484,9 +484,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -505,9 +505,9 @@ class CPUTest {
 
         CPU.cmpAbsoluteX();
 
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_CARRY_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x03, CPU.pc);
     }
 
@@ -520,8 +520,8 @@ class CPUTest {
 
         assertEquals(0x08, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -532,8 +532,8 @@ class CPUTest {
         CPU.dex();
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -545,8 +545,8 @@ class CPUTest {
 
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
-        assertFalse(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_ZERO_FLAG));
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_NEGATIVE_FLAG));
+        assertFalse(CPU.getStatusFlag(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_NEGATIVE));
     }
 
     @Test
@@ -561,7 +561,7 @@ class CPUTest {
         // TODO: test for values in stack
 
         assertEquals(0xABCD, CPU.pc);
-        assertTrue(CPU.getProcessorStatusFlag(CPU.STATUS_REGISTER_BREAK_FLAG));
+        assertTrue(CPU.getStatusFlag(CPU.STATUS_FLAG_BREAK));
     }
     // get pc from $FFFE-$FFFF
 

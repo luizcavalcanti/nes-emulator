@@ -2,14 +2,14 @@ package nesemulator;
 
 public class CPU {
 
-    public static int STATUS_REGISTER_CARRY_FLAG = 0;
-    public static int STATUS_REGISTER_ZERO_FLAG = 1;
-    public static int STATUS_REGISTER_INTERRUPT_FLAG = 2;
-    public static int STATUS_REGISTER_DECIMAL_FLAG = 3;
-    public static int STATUS_REGISTER_BREAK_FLAG = 4;
-    public static int STATUS_REGISTER_ALWAYS_ONE_FLAG = 5;
-    public static int STATUS_REGISTER_OVERFLOW_FLAG = 6;
-    public static int STATUS_REGISTER_NEGATIVE_FLAG = 7;
+    public static int STATUS_FLAG_CARRY = 0;
+    public static int STATUS_FLAG_ZERO = 1;
+    public static int STATUS_FLAG_INTERRUPT = 2;
+    public static int STATUS_FLAG_DECIMAL = 3;
+    public static int STATUS_FLAG_BREAK = 4;
+    public static int STATUS_FLAG_ALWAYS_ONE = 5;
+    public static int STATUS_FLAG_OVERFLOW = 6;
+    public static int STATUS_FLAG_NEGATIVE = 7;
 
     private static final int INITIAL_PC = 0x8000;
     private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
@@ -123,11 +123,23 @@ public class CPU {
         System.out.printf("Program ended after %d operations run%n", opsCount);
     }
 
+    static boolean getStatusFlag(int flagIndex) {
+        return (p & (1 << (flagIndex))) > 0;
+    }
+
+    static void setStatusFlag(int flagIndex) {
+        p |= 1 << flagIndex;
+    }
+
+    static void unsetStatusFlag(int flagIndex) {
+        p &= ~(1 << flagIndex);
+    }
+
     static void bpl() {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
-        if (!getProcessorStatusFlag(STATUS_REGISTER_NEGATIVE_FLAG)) {
+        if (!getStatusFlag(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
@@ -138,7 +150,7 @@ public class CPU {
     static void sei() {
         System.out.printf("%06d: SEI (2 cycles)%n", pc);
 
-        setProcessorStatusFlag(STATUS_REGISTER_INTERRUPT_FLAG);
+        setStatusFlag(STATUS_FLAG_INTERRUPT);
         pc += 1;
     }
 
@@ -272,7 +284,7 @@ public class CPU {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
-        if (!getProcessorStatusFlag(STATUS_REGISTER_ZERO_FLAG)) {
+        if (!getStatusFlag(STATUS_FLAG_ZERO)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
@@ -283,7 +295,7 @@ public class CPU {
     static void cld() {
         System.out.printf("%06d: CLD (2 cycles)%n", pc);
 
-        unsetProcessorStatusFlag(STATUS_REGISTER_DECIMAL_FLAG);
+        unsetStatusFlag(STATUS_FLAG_DECIMAL);
         pc += 1;
     }
 
@@ -316,12 +328,12 @@ public class CPU {
 
         var result = CPU.y - value;
         if (result > 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_CARRY_FLAG);
+            setStatusFlag(STATUS_FLAG_CARRY);
         } else if (result == 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_CARRY_FLAG);
-            setProcessorStatusFlag(STATUS_REGISTER_ZERO_FLAG);
+            setStatusFlag(STATUS_FLAG_CARRY);
+            setStatusFlag(STATUS_FLAG_ZERO);
         } else {
-            setProcessorStatusFlag(STATUS_REGISTER_NEGATIVE_FLAG);
+            setStatusFlag(STATUS_FLAG_NEGATIVE);
         }
 
         pc += 2;
@@ -336,12 +348,12 @@ public class CPU {
 
         var result = CPU.a - value;
         if (result > 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_CARRY_FLAG);
+            setStatusFlag(STATUS_FLAG_CARRY);
         } else if (result == 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_CARRY_FLAG);
-            setProcessorStatusFlag(STATUS_REGISTER_ZERO_FLAG);
+            setStatusFlag(STATUS_FLAG_CARRY);
+            setStatusFlag(STATUS_FLAG_ZERO);
         } else {
-            setProcessorStatusFlag(STATUS_REGISTER_NEGATIVE_FLAG);
+            setStatusFlag(STATUS_FLAG_NEGATIVE);
         }
 
         pc += 3;
@@ -350,7 +362,7 @@ public class CPU {
     static void brk() {
         System.out.printf("%06d: BRK (7 cycles)%n", pc);
 
-        setProcessorStatusFlag(STATUS_REGISTER_BREAK_FLAG);
+        setStatusFlag(STATUS_FLAG_BREAK);
 
         int newPCAddress = littleEndianToInt(MMU.readAddress(0xFFFE), MMU.readAddress(0xFFFF));
 
@@ -369,21 +381,9 @@ public class CPU {
 
     private static void setNonPositiveFlags(int value) {
         if (value == 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_ZERO_FLAG);
+            setStatusFlag(STATUS_FLAG_ZERO);
         } else if (value < 0) {
-            setProcessorStatusFlag(STATUS_REGISTER_NEGATIVE_FLAG);
+            setStatusFlag(STATUS_FLAG_NEGATIVE);
         }
-    }
-
-    static boolean getProcessorStatusFlag(int flagIndex) {
-        return (p & (1 << (flagIndex))) > 0;
-    }
-
-    static void setProcessorStatusFlag(int flagIndex) {
-        p |= 1 << flagIndex;
-    }
-
-    static void unsetProcessorStatusFlag(int flagIndex) {
-        p &= ~(1 << flagIndex);
     }
 }
