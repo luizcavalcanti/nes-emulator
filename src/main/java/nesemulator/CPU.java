@@ -2,6 +2,32 @@ package nesemulator;
 
 public class CPU {
 
+    public static final int OPCODE_BRK = 0x00;
+    public static final int OPCODE_BPL = 0x10;
+    public static final int OPCODE_JSR = 0x20;
+    public static final int OPCODE_PHA = 0x48;
+    public static final int OPCODE_JMP_ABSOLUTE = 0x4C;
+    public static final int OPCODE_SEI = 0x78;
+    public static final int OPCODE_STY_ZERO_PAGE = 0x84;
+    public static final int OPCODE_DEY = 0x88;
+    public static final int OPCODE_TXA = 0x8A;
+    public static final int OPCODE_STA_ABSOLUTE = 0x8D;
+    public static final int OPCODE_STA_INDIRECT_Y = 0x91;
+    public static final int OPCODE_STA_ZERO_PAGE_X = 0x95;
+    public static final int OPCODE_TYA = 0x98;
+    public static final int OPCODE_TXS = 0x9A;
+    public static final int OPCODE_LDY_IMMEDIATE = 0xA0;
+    public static final int OPCODE_LDX_IMMEDIATE = 0xA2;
+    public static final int OPCODE_LDA_IMMEDIATE = 0xA9;
+    public static final int OPCODE_LDA_ABSOLUTE = 0xAD;
+    public static final int OPCODE_LDA_ABSOLUTE_X = 0xBD;
+    public static final int OPCODE_CPY_IMMEDIATE = 0xC0;
+    public static final int OPCODE_DEX = 0xCA;
+    public static final int OPCODE_BNE = 0xD0;
+    public static final int OPCODE_CLD = 0xD8;
+    public static final int OPCODE_CMP_ABSOLUTE_X = 0xDD;
+    public static final int OPCODE_INX = 0xE8;
+
     public static int STATUS_FLAG_CARRY = 0;
     public static int STATUS_FLAG_ZERO = 1;
     public static int STATUS_FLAG_INTERRUPT = 2;
@@ -39,79 +65,79 @@ public class CPU {
             opsCount++;
             int opcode = signedToUsignedByte(MMU.readAddress(pc));
             switch (opcode) {
-                case 0x00:
+                case OPCODE_BRK:
                     brk();
                     break;
-                case 0x10:
+                case OPCODE_BPL:
                     bpl();
                     break;
-//                case 0x20:
+//                case OPCODE_JSR:
 //                    jsr();
 //                    break;
-//                case 0x48:
+//                case OPCODE_PHA:
 //                    pha();
 //                    break;
-//                case 0x4C:
+//                case OPCODE_JMP_ABSOLUTE:
 //                    jmpAbsolute();
 //                    break;
-                case 0x78:
+                case OPCODE_SEI:
                     sei();
                     break;
-//                case 0x84:
+//                case OPCODE_STY_ZERO_PAGE:
 //                    styZeroPage();
 //                    break;
-//                case 0x88:
+//                case OPCODE_DEY:
 //                    dey();
 //                    break;
-//                case 0x8A:
+//                case OPCODE_TXA:
 //                    txa();
 //                    break;
-                case 0x8D:
+                case OPCODE_STA_ABSOLUTE:
                     staAbsolute();
                     break;
-//                case 0x91:
-//                    staIndirectIndexed();
+//                case OPCODE_STA_INDIRECT_Y:
+//                    staIndirectY();
 //                    break;
-                case 0x95:
+                case OPCODE_STA_ZERO_PAGE_X:
                     staZeroPageX();
                     break;
-//                case 0x98:
+//                case OPCODE_TYA:
 //                    tya();
 //                    break;
-                case 0x9A:
+                case OPCODE_TXS:
                     txs();
                     break;
-//                case 0xA0:
+//                case OPCODE_LDY_IMMEDIATE:
 //                    ldyImmediate();
 //                    break;
-                case 0xA2:
+                case OPCODE_LDX_IMMEDIATE:
                     ldxImmediate();
                     break;
-                case 0xA9:
+                case OPCODE_LDA_IMMEDIATE:
                     ldaImmediate();
                     break;
-                case 0xAD:
+                case OPCODE_LDA_ABSOLUTE:
                     ldaAbsolute();
                     break;
-                case 0xBD:
+                case OPCODE_LDA_ABSOLUTE_X:
                     ldaAbsoluteX();
                     break;
-                case 0xC0:
+                case OPCODE_CPY_IMMEDIATE:
                     cpyImmediate();
                     break;
-                case 0xCA:
+                case OPCODE_DEX:
                     dex();
                     break;
-                case 0xD0:
+                case OPCODE_BNE:
                     bne();
                     break;
-                case 0xD8:
+                case OPCODE_CLD:
                     cld();
                     break;
-                case 0xDD:
+                case OPCODE_CMP_ABSOLUTE_X:
                     cmpAbsoluteX();
                     break;
-                case 0xE8:
+                case OPCODE_INX:
                     inx();
                     break;
                 default:
@@ -237,7 +263,7 @@ public class CPU {
         pc += 3;
     }
 
-    private static void staIndirectIndexed() {
+    private static void staIndirectY() {
         int addressStart = signedToUsignedByte(MMU.readAddress(pc + 1));
         int value = littleEndianToInt(MMU.readAddress(addressStart), MMU.readAddress(addressStart + 1));
         System.out.printf("%06d: STA ($%04X), Y (5 cycles)%n", pc, value);
