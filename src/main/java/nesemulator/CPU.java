@@ -13,10 +13,13 @@ public class CPU {
     static int pc;
     static int s;
 
+    static boolean alwaysOneFlag;
+    static boolean breakFlag;
     static boolean carryFlag;
     static boolean decimalFlag;
     static boolean interruptFlag;
     static boolean negativeFlag;
+    static boolean overflowFlag;
     static boolean zeroFlag;
 
     private CPU() {
@@ -27,11 +30,14 @@ public class CPU {
         s = STACK_TOP_ADDRESS; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
         a = x = y = 0x00; // Registers cleanup
+        alwaysOneFlag = false;
+        breakFlag = false;
         carryFlag = false;
         decimalFlag = false;
-        zeroFlag = false;
-        negativeFlag = false;
         interruptFlag = false;
+        negativeFlag = false;
+        overflowFlag = false;
+        zeroFlag = false;
     }
 
     public static void execute() {
@@ -115,7 +121,7 @@ public class CPU {
                     inx();
                     break;
                 default:
-                    System.out.printf("%06d: OpCode $%X not implemented%n", pc, opcode);
+                    System.out.printf("%06d: OpCode $%02X not implemented%n", pc, opcode);
                     running = false;
             }
         }
@@ -360,5 +366,29 @@ public class CPU {
     private static void setNonPositiveFlags(int value) {
         zeroFlag = value == 0;
         negativeFlag = value < 0;
+    }
+
+    /**
+     * Bit # 	Flag
+     * 7 	    N - Negative Flag
+     * 6 	    V - Overflow Flag
+     * 5 	    1 - Always 1 Flag
+     * 4 	    B - Break Flag
+     * 3 	    D - Decimal Flag
+     * 2 	    I - Interrupt Flag
+     * 1 	    Z - Zero Flag
+     * 0 	    C - Carry Flag
+     */
+    static int getProcessorStatusAsByte() {
+        int status = 0;
+        status |= (negativeFlag ? 1 : 0) << 7;
+        status |= (overflowFlag ? 1 : 0) << 6;
+        status |= (alwaysOneFlag ? 1 : 0) << 5;
+        status |= (breakFlag ? 1 : 0) << 4;
+        status |= (decimalFlag ? 1 : 0) << 3;
+        status |= (interruptFlag ? 1 : 0) << 2;
+        status |= (zeroFlag ? 1 : 0) << 1;
+        status |= (carryFlag ? 1 : 0);
+        return status;
     }
 }

@@ -31,10 +31,13 @@ class CPUTest {
 
     @Test
     void initializeMustCleanFlags() {
+        assertFalse(CPU.alwaysOneFlag);
+        assertFalse(CPU.breakFlag);
         assertFalse(CPU.carryFlag);
         assertFalse(CPU.decimalFlag);
         assertFalse(CPU.interruptFlag);
         assertFalse(CPU.negativeFlag);
+        assertFalse(CPU.overflowFlag);
         assertFalse(CPU.zeroFlag);
     }
 
@@ -561,4 +564,41 @@ class CPUTest {
         assertTrue(CPU.negativeFlag);
     }
 
+    @Test
+    void getProcessorStatusAsByteShouldReturnProperValuesForEachFlag() {
+        int result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00000000, result);
+
+        CPU.alwaysOneFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00100000, result);
+
+        CPU.breakFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00110000, result);
+
+        CPU.carryFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00110001, result);
+
+        CPU.decimalFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00111001, result);
+
+        CPU.interruptFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b00111101, result);
+
+        CPU.negativeFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b10111101, result);
+
+        CPU.overflowFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b11111101, result);
+
+        CPU.zeroFlag = true;
+        result = CPU.getProcessorStatusAsByte();
+        assertEquals(0b11111111, result);
+    }
 }

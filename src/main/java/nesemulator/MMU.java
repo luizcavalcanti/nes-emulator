@@ -16,6 +16,10 @@ public class MMU {
         for (int i = 0; i < cart.prgROM.length; i++) {
             memory[INTIAL_CART_PRG_ROM_ADDRESS + i] = (int) cart.prgROM[i];
         }
+
+//        for (int i = 0; i < cart.chrROM.length; i++) {
+//            memory[INTIAL_CART_PRG_ROM_ADDRESS + i] = (int) cart.prgROM[i];
+//        }
     }
 
     public static int readAddress(int address) {
