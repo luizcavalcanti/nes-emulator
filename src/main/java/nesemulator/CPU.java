@@ -14,6 +14,7 @@ public class CPU {
     public static final int OPCODE_DEY = 0x88;
     public static final int OPCODE_TXA = 0x8A;
     public static final int OPCODE_STA_ABSOLUTE = 0x8D;
+    public static final int OPCODE_BCC = 0x90;
     public static final int OPCODE_STA_INDIRECT_Y = 0x91;
     public static final int OPCODE_STA_ZERO_PAGE_X = 0x95;
     public static final int OPCODE_TYA = 0x98;
@@ -82,9 +83,9 @@ public class CPU {
 //                case OPCODE_PHA:
 //                    pha();
 //                    break;
-//                case OPCODE_JMP_ABSOLUTE:
-//                    jmpAbsolute();
-//                    break;
+                case OPCODE_JMP_ABSOLUTE:
+                    jmpAbsolute();
+                    break;
                 case OPCODE_SEI:
                     sei();
                     break;
@@ -102,6 +103,9 @@ public class CPU {
 //                    break;
                 case OPCODE_STA_ABSOLUTE:
                     staAbsolute();
+                    break;
+                case OPCODE_BCC:
+                    bcc();
                     break;
 //                case OPCODE_STA_INDIRECT_Y:
 //                    staIndirectY();
@@ -181,6 +185,18 @@ public class CPU {
         pc += offset;
     }
 
+    static void bcc() {
+        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        var cycles = 2;
+        var offset = 2;
+        if (!isStatusFlagSet(STATUS_FLAG_CARRY)) {
+            cycles += 1;
+            offset += MMU.readAddress(pc + 1);
+        }
+        System.out.printf("%06d: BCC (%d cycles)%n", pc, cycles);
+        pc += offset;
+    }
+
     static void bpl() {
         // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
@@ -209,7 +225,7 @@ public class CPU {
         pc += 2;
     }
 
-    private static void jmpAbsolute() {
+    static void jmpAbsolute() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
         System.out.printf("%06d: JMP $%04X (3 cycles)%n", pc, address);
 
@@ -303,7 +319,7 @@ public class CPU {
 
     static void staZeroPage() {
         int value = signedToUsignedByte(MMU.readAddress(pc + 1));
-        System.out.printf("%06d: STA $%X (3 cycles)%n", pc, value);
+        System.out.printf("%06d: STA $%02X (3 cycles)%n", pc, value);
 
         MMU.writeAddress(value, a);
         pc += 2;
@@ -311,7 +327,7 @@ public class CPU {
 
     static void staZeroPageX() {
         int address = signedToUsignedByte(MMU.readAddress(pc + 1));
-        System.out.printf("%06d: STA $%X, X (4 cycles)%n", pc, address);
+        System.out.printf("%06d: STA $%02X, X (4 cycles)%n", pc, address);
 
         MMU.writeAddress(address + CPU.x, CPU.a);
         pc += 2;

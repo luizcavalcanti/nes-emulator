@@ -607,4 +607,39 @@ class CPUTest {
         assertEquals(0xABCD, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_BREAK));
     }
+
+    @Test
+    void jmpAbsoluteMustMoveProgramCounterToGivenAddress() {
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, 0xAD);
+        MMU.writeAddress(0x02, 0xDE);
+
+        CPU.jmpAbsolute();
+
+        assertEquals(0xDEAD, CPU.pc);
+    }
+
+    @Test
+    void bccMustDisplaceProgramCounterByGivenOffsetIfCarryFlagIsClear() {
+        var offset = -3;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, offset);
+        CPU.unsetStatusFlag(CPU.STATUS_FLAG_CARRY);
+
+        CPU.bcc();
+
+        assertEquals(offset + 2, CPU.pc);
+    }
+
+    @Test
+    void bccMustDisplaceProgramCounterBy2IfCarryFlagIsSet() {
+        var offset = -3;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, offset);
+        CPU.setStatusFlag(CPU.STATUS_FLAG_CARRY);
+
+        CPU.bcc();
+
+        assertEquals(0x02, CPU.pc);
+    }
 }
