@@ -313,6 +313,21 @@ class CPUTest {
     }
 
     @Test
+    void staZeroPageMustStoreRegisterAContentIntoMemoryAddress() {
+        int address = 0x99;
+        CPU.a = 0xAB;
+
+        CPU.pc = 0x00;
+        MMU.writeAddress(address, 0);
+        MMU.writeAddress(0x01, address);
+
+        CPU.staZeroPage();
+
+        assertEquals(0xAB, MMU.readAddress(address));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
     void inxMustIncrementRegisterXBy1() {
         CPU.x = 0x09;
         CPU.pc = 0x00;

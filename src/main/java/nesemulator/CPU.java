@@ -10,6 +10,7 @@ public class CPU {
     public static final int OPCODE_JMP_ABSOLUTE = 0x4C;
     public static final int OPCODE_SEI = 0x78;
     public static final int OPCODE_STY_ZERO_PAGE = 0x84;
+    public static final int OPCODE_STA_ZERO_PAGE = 0x85;
     public static final int OPCODE_DEY = 0x88;
     public static final int OPCODE_TXA = 0x8A;
     public static final int OPCODE_STA_ABSOLUTE = 0x8D;
@@ -90,6 +91,9 @@ public class CPU {
 //                case OPCODE_STY_ZERO_PAGE:
 //                    styZeroPage();
 //                    break;
+                case OPCODE_STA_ZERO_PAGE:
+                    staZeroPage();
+                    break;
 //                case OPCODE_DEY:
 //                    dey();
 //                    break;
@@ -294,6 +298,14 @@ public class CPU {
         System.out.printf("%06d: STY $%X (3 cycles)%n", pc, value);
 
         MMU.writeAddress(value, y);
+        pc += 2;
+    }
+
+    static void staZeroPage() {
+        int value = signedToUsignedByte(MMU.readAddress(pc + 1));
+        System.out.printf("%06d: STA $%X (3 cycles)%n", pc, value);
+
+        MMU.writeAddress(value, a);
         pc += 2;
     }
 
