@@ -22,7 +22,7 @@ class CPUTest {
 
     @Test
     void initializeMustSetStackPointerToHigherAddress() {
-        assertEquals(0x0200, CPU.s);
+        assertEquals(0xFD, CPU.s);
     }
 
     @Test
@@ -605,9 +605,9 @@ class CPUTest {
         CPU.brk();
 
         assertEquals(oldStackPointer - 3, CPU.s);
-        assertEquals(oldProcessorStatus, MMU.readAddress(CPU.s+1));
-        assertEquals(oldPCByte2, MMU.readAddress(CPU.s + 2));
-        assertEquals(oldPCByte1, MMU.readAddress(CPU.s + 3));
+        assertEquals(oldProcessorStatus, MMU.readAddress(0x0100 + CPU.s + 1));
+        assertEquals(oldPCByte2, MMU.readAddress(0x0100 + CPU.s + 2));
+        assertEquals(oldPCByte1, MMU.readAddress(0x0100 + CPU.s + 3));
         assertEquals(0xABCD, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_BREAK));
     }

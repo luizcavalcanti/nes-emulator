@@ -42,7 +42,7 @@ public class CPU {
 
     private static final int INITIAL_PC = 0x8000;
     private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
-    public static final int STACK_TOP_ADDRESS = 0x0200;
+    public static final int INITIAL_STACK_POINTER = 0xFD;
 
     static int a;
     static int x;
@@ -55,7 +55,7 @@ public class CPU {
     }
 
     public static void initialize() {
-        s = STACK_TOP_ADDRESS; // Stack pointer staring into the abyss
+        s = INITIAL_STACK_POINTER; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
         a = x = y = p = 0x00; // Registers cleanup
     }
@@ -462,7 +462,7 @@ public class CPU {
     }
 
     private static void pushToStack(int value) {
-        MMU.writeAddress(s, value);
+        MMU.writeAddress(0x0100 + s, value);
         s--;
     }
 
@@ -476,6 +476,6 @@ public class CPU {
 
     private static int popFromStack() {
         s++;
-        return MMU.readAddress(s);
+        return MMU.readAddress(0x0100 + s);
     }
 }
