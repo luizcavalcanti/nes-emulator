@@ -591,19 +591,23 @@ class CPUTest {
     @Test
     void brkMustSetBreakFlagAndPushProgramCounterToStack() {
         CPU.pc = 0x1234;
+        CPU.setStatusFlag(CPU.STATUS_FLAG_CARRY);
 
         // Post-interrupt Program Counter
         MMU.writeAddress(0xFFFE, 0xCD);
         MMU.writeAddress(0xFFFF, 0xAB);
 
         var oldStackPointer = CPU.s;
-        var oldProgramCounter = CPU.pc;
+        var oldProcessorStatus = CPU.p;
+        int oldPCByte1 = (CPU.pc & 0xFF);
+        int oldPCByte2 = ((CPU.pc >> 8) & 0xFF);
 
         CPU.brk();
 
-        assertEquals(oldStackPointer - 2, CPU.s);
-        assertEquals(CPU.p, MMU.readAddress(CPU.s));
-        assertEquals(oldProgramCounter, MMU.readAddress(CPU.s + 1));
+        assertEquals(oldStackPointer - 3, CPU.s);
+        assertEquals(oldProcessorStatus, MMU.readAddress(CPU.s+1));
+        assertEquals(oldPCByte2, MMU.readAddress(CPU.s + 2));
+        assertEquals(oldPCByte1, MMU.readAddress(CPU.s + 3));
         assertEquals(0xABCD, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_BREAK));
     }

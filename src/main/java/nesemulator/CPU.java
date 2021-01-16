@@ -432,9 +432,10 @@ public class CPU {
     static void brk() {
         System.out.printf("%06d: BRK (7 cycles)%n", pc);
 
-        setStatusFlag(STATUS_FLAG_BREAK);
-        pushToStack(pc);
+        push2BytesToStack(pc);
         pushToStack(p);
+
+        setStatusFlag(STATUS_FLAG_BREAK);
 
         // TODO: understand what should happen here and name those constants
         int newPCAddress = littleEndianToInt(MMU.readAddress(0xFFFE), MMU.readAddress(0xFFFF));
@@ -461,13 +462,20 @@ public class CPU {
     }
 
     private static void pushToStack(int value) {
-        s--;
         MMU.writeAddress(s, value);
+        s--;
+    }
+
+    private static void push2BytesToStack(int value) {
+        int byte1 = (value & 0xFF);
+        int byte2 = ((value >> 8) & 0xFF);
+
+        pushToStack(byte1);
+        pushToStack(byte2);
     }
 
     private static int popFromStack() {
-        int value = MMU.readAddress(s);
         s++;
-        return value;
+        return MMU.readAddress(s);
     }
 }
