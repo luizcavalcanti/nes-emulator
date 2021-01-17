@@ -1,21 +1,28 @@
 package nesemulator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class Main {
+
+    static {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
+    }
+
+    static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         try {
             String romFileName = "balloon.nes";
 
-            System.out.printf("Loading %s...%n", romFileName);
+            logger.info("Loading {}...", romFileName);
             Cart cart = Cart.fromROMFile(romFileName);
             MMU.loadCart(cart);
-            System.out.println("Cart loaded");
-
-            System.out.println("Initializing CPU...");
+            logger.info("Initializing CPU...");
             CPU.initialize();
-            System.out.println("Executing...");
+            logger.info("Executing...");
             CPU.execute();
         } catch (IOException e) {
             e.printStackTrace();

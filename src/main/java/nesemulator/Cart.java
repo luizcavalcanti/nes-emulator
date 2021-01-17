@@ -1,11 +1,16 @@
 package nesemulator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
 public class Cart {
+
+    static final Logger logger = LoggerFactory.getLogger(Cart.class);
 
     byte[] prgROM;
     byte[] chrROM;
@@ -24,8 +29,8 @@ public class Cart {
         byte[] header = Arrays.copyOfRange(romFileData, 0, 15);
         int prgROMSize = header[4] * 16 * 1024;
         int chrROMSize = header[5] * 8 * 1024;
-        System.out.println(String.format("PRG ROM size(b): %d", prgROMSize));
-        System.out.println(String.format("CHR ROM size(b): %d", chrROMSize));
+        logger.info("PRG ROM size (bytes): {}", prgROMSize);
+        logger.info("CHR ROM size (bytes): {}", chrROMSize);
 
         int prgStartByte = 16;
         int prgEndByte = prgStartByte + prgROMSize;
