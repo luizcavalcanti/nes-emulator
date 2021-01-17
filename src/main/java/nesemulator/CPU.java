@@ -449,12 +449,12 @@ public class CPU {
     }
 
     private static int signedToUsignedByte(int b) {
-        return b & 0xff;
+        return b & 0xFF;
     }
 
     private static int littleEndianToInt(int b1, int b2) {
-        int i1 = b1 & 0xff;
-        int i2 = b2 & 0xff;
+        int i1 = b1 & 0xFF;
+        int i2 = b2 & 0xFF;
         return (i2 << 8) | i1;
     }
 

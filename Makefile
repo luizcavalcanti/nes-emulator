@@ -11,4 +11,4 @@ clean:
 	mvn clean
 
 run: build
-	java -jar target/nes-emulator-0.0.1.jar
+	java -jar target/nes-emulator-0.0.1-jar-with-dependencies.jar
