@@ -15,6 +15,7 @@ public class CPU {
     static final int STATUS_FLAG_NEGATIVE = 7;
 
     private static final int OPCODE_BRK = 0x00;
+    private static final int OPCODE_ORA = 0x09;
     private static final int OPCODE_BPL = 0x10;
     private static final int OPCODE_JSR = 0x20;
     private static final int OPCODE_BMI = 0x30;
@@ -125,9 +126,9 @@ public class CPU {
                 case OPCODE_TXS:
                     txs();
                     break;
-//                case OPCODE_LDY_IMMEDIATE:
-//                    ldyImmediate();
-//                    break;
+                case OPCODE_LDY_IMMEDIATE:
+                    ldyImmediate();
+                    break;
                 case OPCODE_LDX_IMMEDIATE:
                     ldxImmediate();
                     break;
@@ -227,7 +228,7 @@ public class CPU {
 
     static void ldxImmediate() {
         int value = MMU.readAddress(pc + 1);
-        logger.info(String.format("%06d: LDX #$%X (2 cycles)", pc, value));
+        logger.info(String.format("%06d: LDX #$%02X (2 cycles)", pc, value));
 
         CPU.x = value;
         setNonPositiveFlags(x);
@@ -265,19 +266,19 @@ public class CPU {
     }
 
     static void ldaAbsolute() {
-        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        logger.info(String.format("%06d: LDA $%04X (4 cycles)", pc, value));
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        logger.info(String.format("%06d: LDA $%04X (4 cycles)", pc, address));
 
-        a = MMU.readAddress(value);
+        a = MMU.readAddress(address);
         setNonPositiveFlags(a);
         pc += 3;
     }
 
     static void ldaAbsoluteX() {
-        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        logger.info(String.format("%06d: LDA $%04X, X (4 cycles)", pc, value));
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        logger.info(String.format("%06d: LDA $%04X, X (4 cycles)", pc, address));
 
-        a = MMU.readAddress(value + x);
+        a = MMU.readAddress(address + x);
         setNonPositiveFlags(a);
         pc += 3;
     }
@@ -300,9 +301,9 @@ public class CPU {
         pc += 2;
     }
 
-    private static void ldyImmediate() {
-        int value = signedToUsignedByte(MMU.readAddress(pc + 1));
-        logger.info(String.format("%06d: LDY #$%X (2 cycles)", pc, value));
+    static void ldyImmediate() {
+        int value = MMU.readAddress(pc + 1);
+        logger.info(String.format("%06d: LDY #$%02X (2 cycles)", pc, value));
 
         y = value;
         setNonPositiveFlags(y);
@@ -460,6 +461,16 @@ public class CPU {
         int newPCAddress = littleEndianToInt(MMU.readAddress(0xFFFE), MMU.readAddress(0xFFFF));
 
         pc = newPCAddress;
+    }
+
+    static void oraImmediate() {
+        int value = MMU.readAddress(pc + 1);
+
+        logger.info(String.format("%06d: ORA #$%02X (2 cycles)", pc, value));
+
+        a |= value;
+        setNonPositiveFlags(a);
+        pc += 2;
     }
 
     private static int signedToUsignedByte(int b) {

@@ -41,7 +41,7 @@ public class MMU {
         if (address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_LIMIT) {
             address = PPU_PORTS_INITIAL_ADDRESS + (address % PPU_PORTS_COUNT);
             if (address == 0x2002) {// TODO: Move feature to PPU
-                return (byte) 0b10010000;
+                return (byte) 0b10000000;
             } else {
                 return memory[address];
             }

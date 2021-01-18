@@ -710,4 +710,59 @@ class CPUTest {
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
     }
+
+    @Test
+    void oraMustPerformLogicalORonOperandAndAccumulatorAndStoreResultInAccumulator() {
+        var value = (byte) 0b01010101;
+        CPU.a = (byte) 0b10101111;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, value);
+
+        CPU.oraImmediate();
+
+        assertEquals((byte)0b11111111, CPU.a);
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void ldyImmediateMustLoadSpecifiedValueToRegisterY() {
+        var value = 0xFD;
+        CPU.y = 0x00;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, value);
+        CPU.ldyImmediate();
+
+        assertEquals(value, CPU.y);
+        assertEquals(0x02, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void ldyImmediateMustSetNegativeFlagIsAIsNegative() {
+        var value = -1;
+        CPU.y = 0x00;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, value);
+        CPU.ldyImmediate();
+
+        assertEquals(value, CPU.y);
+        assertEquals(0x02, CPU.pc);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+    }
+
+    @Test
+    void ldyImmediateMustSetZeroFlagIsAIsZero() {
+        var value = 0x00;
+        CPU.y = 0x01;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, value);
+        CPU.ldyImmediate();
+
+        assertEquals(value, CPU.y);
+        assertEquals(0x02, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+    }
 }
