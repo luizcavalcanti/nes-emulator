@@ -8,7 +8,7 @@ in java 11 (because reasons).
 
 ### What's working so far?
 
-- I can kinda load iNES rom file format into memory
+- Loading iNES 1.0 rom format with some headers
 - Basic mirroring for Cart PRG ROM and CPU RAM addresses
 - A functional CPU with some opcodes (implementing them as needed)
 
