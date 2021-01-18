@@ -96,9 +96,9 @@ public class CPU {
                 case OPCODE_SEI:
                     sei();
                     break;
-//                case OPCODE_STY_ZERO_PAGE:
-//                    styZeroPage();
-//                    break;
+                case OPCODE_STY_ZERO_PAGE:
+                    styZeroPage();
+                    break;
                 case OPCODE_STA_ZERO_PAGE:
                     staZeroPage();
                     break;
@@ -328,7 +328,7 @@ public class CPU {
         pc += 2;
     }
 
-    private static void styZeroPage() {
+    static void styZeroPage() {
         int value = signedToUsignedByte(MMU.readAddress(pc + 1));
         logger.info(String.format("%06d: STY $%X (3 cycles)", pc, value));
 

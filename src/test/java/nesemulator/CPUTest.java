@@ -69,7 +69,7 @@ class CPUTest {
     }
 
     @Test
-    void ldaImmediateMustSetNegativeFlagIsAIsNegative() {
+    void ldaImmediateMustSetNegativeFlagIfAIsNegative() {
         var value = -1;
         CPU.a = 0x00;
         CPU.pc = 0x00;
@@ -83,7 +83,7 @@ class CPUTest {
     }
 
     @Test
-    void ldaImmediateMustSetZeroFlagIsAIsZero() {
+    void ldaImmediateMustSetZeroFlagIfAIsZero() {
         var value = 0x00;
         CPU.a = 0x01;
         CPU.pc = 0x00;
@@ -322,6 +322,21 @@ class CPUTest {
         MMU.writeAddress(0x01, address);
 
         CPU.staZeroPage();
+
+        assertEquals(0xAB, MMU.readAddress(address));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void styZeroPageMustStoreRegisterYContentIntoMemoryAddress() {
+        int address = 0x99;
+        CPU.y = 0xAB;
+
+        CPU.pc = 0x00;
+        MMU.writeAddress(address, 0);
+        MMU.writeAddress(0x01, address);
+
+        CPU.styZeroPage();
 
         assertEquals(0xAB, MMU.readAddress(address));
         assertEquals(0x02, CPU.pc);
@@ -739,7 +754,7 @@ class CPUTest {
     }
 
     @Test
-    void ldyImmediateMustSetNegativeFlagIsAIsNegative() {
+    void ldyImmediateMustSetNegativeFlagIfYIsNegative() {
         var value = -1;
         CPU.y = 0x00;
         CPU.pc = 0x00;
@@ -753,7 +768,7 @@ class CPUTest {
     }
 
     @Test
-    void ldyImmediateMustSetZeroFlagIsAIsZero() {
+    void ldyImmediateMustSetZeroFlagIfYIsZero() {
         var value = 0x00;
         CPU.y = 0x01;
         CPU.pc = 0x00;
