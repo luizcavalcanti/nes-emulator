@@ -6,6 +6,7 @@ public class MMU {
     }
 
     private static final int INTIAL_CART_PRG_ROM_ADDRESS = 0x8000;
+    private static final int INTIAL_CART_PRG_ROM_MIRROR_ADDRESS = 0xC000;
     private static final int WHOLE_MEMORY_SIZE = 0x10001;
     private static final int CPU_RAM_UPPER_LIMIT = 0x1FFF;
     private static final int PPU_PORTS_INITIAL_ADDRESS = 0x2000;
@@ -19,8 +20,16 @@ public class MMU {
     }
 
     public static void loadCart(Cart cart) {
+        boolean mirror = false;
+        if (cart.boardModel == 0 && cart.prgROM.length <= 16 * 1024) {
+            mirror = true;
+        }
+
         for (int i = 0; i < cart.prgROM.length; i++) {
             memory[INTIAL_CART_PRG_ROM_ADDRESS + i] = (int) cart.prgROM[i];
+            if (mirror) {
+                memory[INTIAL_CART_PRG_ROM_MIRROR_ADDRESS + i] = (int) cart.prgROM[i];
+            }
         }
     }
 
@@ -41,9 +50,14 @@ public class MMU {
     }
 
     public static void writeAddress(int address, int value) {
-        memory[address] = value;
         if (address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_LIMIT) {
             //TODO call PPU
         }
+
+        if (address <= CPU_RAM_UPPER_LIMIT) { //CPU RAM Mirroring
+            address = address % 2048;
+        }
+
+        memory[address] = value;
     }
 }

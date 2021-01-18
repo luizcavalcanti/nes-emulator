@@ -12,6 +12,7 @@ public class Cart {
 
     static final Logger logger = LoggerFactory.getLogger(Cart.class);
 
+    int boardModel;
     byte[] prgROM;
     byte[] chrROM;
     //private byte[] chrRAM; // TODO: Load CHR RAM when adequate
@@ -29,6 +30,9 @@ public class Cart {
         byte[] header = Arrays.copyOfRange(romFileData, 0, 15);
         int prgROMSize = header[4] * 16 * 1024;
         int chrROMSize = header[5] * 8 * 1024;
+        parseFlags(cart, header[6]);
+
+        logger.info(String.format("Header flags: %X", header[6]));
         logger.info("PRG ROM size (bytes): {}", prgROMSize);
         logger.info("CHR ROM size (bytes): {}", chrROMSize);
 
@@ -42,6 +46,10 @@ public class Cart {
         }
 
         return cart;
+    }
+
+    private static void parseFlags(Cart cart, byte b) {
+        cart.boardModel = ((b >> 4) & 1) == 0 ? 0 : 1;
     }
 
     private static boolean isNes10Format(byte[] fileData) {

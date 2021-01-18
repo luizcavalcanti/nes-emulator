@@ -38,4 +38,41 @@ class MMUTest {
         assertEquals(value, MMU.readAddress(0x3FFB));
     }
 
+    @Test
+    void loadCartShouldMirrorPRGROMIfBoardModelIsZero() {
+        MMU.initialize();
+        Cart cart = new Cart();
+        cart.prgROM = new byte[10];
+        for (int i = 0; i < 10; i++) {
+            cart.prgROM[i] = (byte) i;
+        }
+        cart.boardModel = 0;
+
+        MMU.loadCart(cart);
+
+        // Default addresses
+        assertEquals(0x00, MMU.readAddress(0x8000));
+        assertEquals(0x01, MMU.readAddress(0x8001));
+        assertEquals(0x02, MMU.readAddress(0x8002));
+        assertEquals(0x03, MMU.readAddress(0x8003));
+        assertEquals(0x04, MMU.readAddress(0x8004));
+        assertEquals(0x05, MMU.readAddress(0x8005));
+        assertEquals(0x06, MMU.readAddress(0x8006));
+        assertEquals(0x07, MMU.readAddress(0x8007));
+        assertEquals(0x08, MMU.readAddress(0x8008));
+        assertEquals(0x09, MMU.readAddress(0x8009));
+
+        // Mirrored adsresses
+        assertEquals(0x00, MMU.readAddress(0xC000));
+        assertEquals(0x01, MMU.readAddress(0xC001));
+        assertEquals(0x02, MMU.readAddress(0xC002));
+        assertEquals(0x03, MMU.readAddress(0xC003));
+        assertEquals(0x04, MMU.readAddress(0xC004));
+        assertEquals(0x05, MMU.readAddress(0xC005));
+        assertEquals(0x06, MMU.readAddress(0xC006));
+        assertEquals(0x07, MMU.readAddress(0xC007));
+        assertEquals(0x08, MMU.readAddress(0xC008));
+        assertEquals(0x09, MMU.readAddress(0xC009));
+    }
+
 }
