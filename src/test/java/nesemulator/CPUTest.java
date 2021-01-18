@@ -661,4 +661,53 @@ class CPUTest {
         assertEquals(0x00, MMU.readAddress(0x0100 + CPU.s + 1));
         assertEquals(0x06, MMU.readAddress(0x0100 + CPU.s + 2));
     }
+
+    @Test
+    void ldaZeroPageMustLoadUnsignedValueInGivenAddressIntoRegisterA() {
+        var address = 0xFD;
+        var value = 0xAA;
+        CPU.a = 0x00;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, address);
+        MMU.writeAddress(0xFD, value);
+
+        CPU.ldaZeroPage();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x02, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void ldaZeroPageMustSetNegativeFlagIsAIsNegative() {
+        var address = 0xFD;
+        var value = -1  ;
+        CPU.a = 0x00;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, address);
+        MMU.writeAddress(0xFD, value);
+
+        CPU.ldaZeroPage();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x02, CPU.pc);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+    }
+
+    @Test
+    void ldaZeroPageMustSetZeroFlagIsAIsZero() {
+        var value = 0x00;
+        CPU.a = 0x00;
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, value);
+
+        CPU.ldaZeroPage();
+
+        assertEquals(value, CPU.a);
+        assertEquals(0x02, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+    }
 }

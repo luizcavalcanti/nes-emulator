@@ -33,6 +33,7 @@ public class CPU {
     private static final int OPCODE_TXS = 0x9A;
     private static final int OPCODE_LDY_IMMEDIATE = 0xA0;
     private static final int OPCODE_LDX_IMMEDIATE = 0xA2;
+    private static final int OPCODE_LDA_ZERO_PAGE = 0xA5;
     private static final int OPCODE_LDA_IMMEDIATE = 0xA9;
     private static final int OPCODE_LDA_ABSOLUTE = 0xAD;
     private static final int OPCODE_LDA_ABSOLUTE_X = 0xBD;
@@ -129,6 +130,9 @@ public class CPU {
 //                    break;
                 case OPCODE_LDX_IMMEDIATE:
                     ldxImmediate();
+                    break;
+                case OPCODE_LDA_ZERO_PAGE:
+                    ldaZeroPage();
                     break;
                 case OPCODE_LDA_IMMEDIATE:
                     ldaImmediate();
@@ -283,6 +287,15 @@ public class CPU {
         logger.info(String.format("%06d: LDA #$%02X (2 cycles)", pc, value));
 
         a = value;
+        setNonPositiveFlags(a);
+        pc += 2;
+    }
+
+    static void ldaZeroPage() {
+        int address = MMU.readAddress(pc + 1);
+        logger.info(String.format("%06d: LDA $%02X (2 cycles)", pc, address));
+
+        a = MMU.readAddress(address);
         setNonPositiveFlags(a);
         pc += 2;
     }
