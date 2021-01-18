@@ -9,7 +9,8 @@ in java 11 (because reasons).
 ### What's working so far?
 
 - I can kinda load iNES rom file format into memory
-- A very initial version of CPU with a dozen instructions or so
+- Basic mirroring for Cart PRG ROM and CPU RAM addresses
+- A functional CPU with some opcodes (implementing them as needed)
 
 ### What I'm working on right now?
 
