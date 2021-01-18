@@ -475,8 +475,14 @@ public class CPU {
     private static void setNonPositiveFlags(int value) {
         if (value == 0) {
             setStatusFlag(STATUS_FLAG_ZERO);
-        } else if (value < 0) {
+        } else {
+            unsetStatusFlag(STATUS_FLAG_ZERO);
+        }
+
+        if (value < 0) {
             setStatusFlag(STATUS_FLAG_NEGATIVE);
+        } else {
+            unsetStatusFlag(STATUS_FLAG_NEGATIVE);
         }
     }
 
