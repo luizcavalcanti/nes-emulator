@@ -646,4 +646,19 @@ class CPUTest {
 
         assertEquals(0x02, CPU.pc);
     }
+
+    @Test
+    void jsrMustPushNextOperationCounterToStashAndAssingOperandToProgramCounter() {
+        int destination1 = 0xDE;
+        int destination2 = 0xAD;
+        CPU.pc = 0x03;
+        MMU.writeAddress(0x04, destination2);
+        MMU.writeAddress(0x05, destination1);
+
+        CPU.jsr();
+
+        assertEquals(0xDEAD, CPU.pc);
+        assertEquals(0x00, MMU.readAddress(0x0100 + CPU.s + 1));
+        assertEquals(0x06, MMU.readAddress(0x0100 + CPU.s + 2));
+    }
 }

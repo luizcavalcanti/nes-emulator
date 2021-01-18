@@ -82,9 +82,9 @@ public class CPU {
                 case OPCODE_BMI:
                     bmi();
                     break;
-//                case OPCODE_JSR:
-//                    jsr();
-//                    break;
+                case OPCODE_JSR:
+                    jsr();
+                    break;
 //                case OPCODE_PHA:
 //                    pha();
 //                    break;
@@ -338,10 +338,11 @@ public class CPU {
         pc += 2;
     }
 
-    private static void jsr() {
+    static void jsr() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
         logger.info(String.format("%06d: JSR $%04X (6 cycles)", pc, address));
-        // TODO: Push address-1 of the next operation to stack
+
+        push2BytesToStack(pc + 3);
 
         pc = address;
     }
