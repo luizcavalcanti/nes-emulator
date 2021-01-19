@@ -614,6 +614,7 @@ class CPUTest {
 
         var oldStackPointer = CPU.s;
         var oldProcessorStatus = CPU.p;
+        oldProcessorStatus |= 1 << 4; // Old status with break flag set
         int oldPCByte1 = (CPU.pc & 0xFF);
         int oldPCByte2 = ((CPU.pc >> 8) & 0xFF);
 
@@ -621,8 +622,8 @@ class CPUTest {
 
         assertEquals(oldStackPointer - 3, CPU.s);
         assertEquals(oldProcessorStatus, MMU.readAddress(0x0100 + CPU.s + 1));
-        assertEquals(oldPCByte2, MMU.readAddress(0x0100 + CPU.s + 2));
-        assertEquals(oldPCByte1, MMU.readAddress(0x0100 + CPU.s + 3));
+        assertEquals(oldPCByte1, MMU.readAddress(0x0100 + CPU.s + 2));
+        assertEquals(oldPCByte2, MMU.readAddress(0x0100 + CPU.s + 3));
         assertEquals(0xABCD, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_BREAK));
     }
@@ -673,8 +674,8 @@ class CPUTest {
         CPU.jsr();
 
         assertEquals(0xDEAD, CPU.pc);
-        assertEquals(0x00, MMU.readAddress(0x0100 + CPU.s + 1));
-        assertEquals(0x06, MMU.readAddress(0x0100 + CPU.s + 2));
+        assertEquals(0x06, MMU.readAddress(0x0100 + CPU.s + 1));
+        assertEquals(0x00, MMU.readAddress(0x0100 + CPU.s + 2));
     }
 
     @Test
@@ -697,7 +698,7 @@ class CPUTest {
     @Test
     void ldaZeroPageMustSetNegativeFlagIsAIsNegative() {
         var address = 0xFD;
-        var value = -1  ;
+        var value = -1;
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, address);
@@ -735,7 +736,7 @@ class CPUTest {
 
         CPU.oraImmediate();
 
-        assertEquals((byte)0b11111111, CPU.a);
+        assertEquals((byte) 0b11111111, CPU.a);
         assertEquals(0x02, CPU.pc);
     }
 
