@@ -318,13 +318,12 @@ public class CPU {
         pc += 3;
     }
 
-    private static void staIndirectY() {
-        int addressStart = signedToUsignedByte(MMU.readAddress(pc + 1));
-        int value = littleEndianToInt(MMU.readAddress(addressStart), MMU.readAddress(addressStart + 1));
-        logger.info(String.format("%06d: STA ($%04X), Y (5 cycles)", pc, value));
+    static void staIndirectY() {
+        int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
+        logger.info(String.format("%04X: STA ($%04X), Y (5 cycles)", pc, addressLSB));
         //TODO add 1 cycle if page boundary is crossed
 
-        MMU.writeAddress(value + y, a);
+        MMU.writeAddress(addressLSB + y, a);
         pc += 2;
     }
 
