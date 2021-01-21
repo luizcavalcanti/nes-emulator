@@ -12,13 +12,17 @@ in java 11 (because reasons).
 - Basic mirroring for Cart PRG ROM and CPU RAM addresses
 - A functional CPU with some opcodes (implementing them as needed)
 
+Supported CPU Opcodes so far: 30 of 151
+
 ### What I'm working on right now?
 
-- Implementing memory management and interaction between CPU and a fake PPU
+- Creating an inspection GUI (javaFX) to understand what's happening in RAM and CPU (visually)
 - MORE OPCODES! (at least enough to run Balloon Fighter)
 
 ### Parking lot
 
+- Fake PPU
+- Interrupts
 - Check for CHR RAM/ROM presence
 - Proper logging
 - Proper memory inspection

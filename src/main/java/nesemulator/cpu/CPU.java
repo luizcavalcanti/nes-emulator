@@ -77,7 +77,7 @@ public class CPU {
             case BRK:
                 cycleCounter += brk();
                 break;
-            case ORA:
+            case ORA_IMMEDIATE:
                 cycleCounter += oraImmediate();
                 break;
             case BPL:
