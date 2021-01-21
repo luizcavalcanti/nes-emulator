@@ -1,5 +1,6 @@
 package nesemulator;
 
+import nesemulator.cpu.CPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

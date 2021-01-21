@@ -46,6 +46,7 @@ public class MMU {
                 return memory[address];
             }
         }
+
         return memory[address];
     }
 

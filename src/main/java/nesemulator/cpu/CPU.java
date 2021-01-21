@@ -1,9 +1,14 @@
-package nesemulator;
+package nesemulator.cpu;
 
+import nesemulator.MMU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 public class CPU {
+
+    static ArrayList<CPUObserver> observers = new ArrayList<>();
 
     static final int STATUS_FLAG_CARRY = 0;
     static final int STATUS_FLAG_ZERO = 1;
@@ -13,37 +18,6 @@ public class CPU {
     static final int STATUS_FLAG_ALWAYS_ONE = 5;
     static final int STATUS_FLAG_OVERFLOW = 6;
     static final int STATUS_FLAG_NEGATIVE = 7;
-
-    private static final int OPCODE_BRK = 0x00;
-    private static final int OPCODE_ORA = 0x09;
-    private static final int OPCODE_BPL = 0x10;
-    private static final int OPCODE_JSR = 0x20;
-    private static final int OPCODE_BMI = 0x30;
-    private static final int OPCODE_PHA = 0x48;
-    private static final int OPCODE_JMP_ABSOLUTE = 0x4C;
-    private static final int OPCODE_SEI = 0x78;
-    private static final int OPCODE_STY_ZERO_PAGE = 0x84;
-    private static final int OPCODE_STA_ZERO_PAGE = 0x85;
-    private static final int OPCODE_DEY = 0x88;
-    private static final int OPCODE_TXA = 0x8A;
-    private static final int OPCODE_STA_ABSOLUTE = 0x8D;
-    private static final int OPCODE_BCC = 0x90;
-    private static final int OPCODE_STA_INDIRECT_Y = 0x91;
-    private static final int OPCODE_STA_ZERO_PAGE_X = 0x95;
-    private static final int OPCODE_TYA = 0x98;
-    private static final int OPCODE_TXS = 0x9A;
-    private static final int OPCODE_LDY_IMMEDIATE = 0xA0;
-    private static final int OPCODE_LDX_IMMEDIATE = 0xA2;
-    private static final int OPCODE_LDA_ZERO_PAGE = 0xA5;
-    private static final int OPCODE_LDA_IMMEDIATE = 0xA9;
-    private static final int OPCODE_LDA_ABSOLUTE = 0xAD;
-    private static final int OPCODE_LDA_ABSOLUTE_X = 0xBD;
-    private static final int OPCODE_CPY_IMMEDIATE = 0xC0;
-    private static final int OPCODE_DEX = 0xCA;
-    private static final int OPCODE_BNE = 0xD0;
-    private static final int OPCODE_CLD = 0xD8;
-    private static final int OPCODE_CMP_ABSOLUTE_X = 0xDD;
-    private static final int OPCODE_INX = 0xE8;
 
     private static final int INITIAL_PC = 0x8000;
     private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
@@ -58,13 +32,30 @@ public class CPU {
     static int pc;
     static int s;
 
+    static int cycleCounter;
+
     private CPU() {
+    }
+
+    public static void addObserver(CPUObserver observer) {
+        observers.add(observer);
+    }
+
+    public static void removeObserver(CPUObserver observer) {
+        observers.remove(observer);
+    }
+
+    private static void notifyInstruction(Opcode opcode, int cycles, int... operands) {
+        for (CPUObserver o : observers) {
+            o.notifyCPUInstruction(pc, opcode, cycles, operands);
+        }
     }
 
     public static void initialize() {
         s = INITIAL_STACK_POINTER; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
         a = x = y = p = 0x00; // Registers cleanup
+        cycleCounter = 0;
     }
 
     public static void execute() {
@@ -73,102 +64,108 @@ public class CPU {
         var running = true;
         while (running) {
             opsCount++;
-            int opcode = signedToUsignedByte(MMU.readAddress(pc));
-            switch (opcode) {
-                case OPCODE_BRK:
-                    brk();
-                    break;
-                case OPCODE_BPL:
-                    bpl();
-                    break;
-                case OPCODE_BMI:
-                    bmi();
-                    break;
-                case OPCODE_JSR:
-                    jsr();
-                    break;
-//                case OPCODE_PHA:
-//                    pha();
-//                    break;
-                case OPCODE_JMP_ABSOLUTE:
-                    jmpAbsolute();
-                    break;
-                case OPCODE_SEI:
-                    sei();
-                    break;
-                case OPCODE_STY_ZERO_PAGE:
-                    styZeroPage();
-                    break;
-                case OPCODE_STA_ZERO_PAGE:
-                    staZeroPage();
-                    break;
-//                case OPCODE_DEY:
-//                    dey();
-//                    break;
-//                case OPCODE_TXA:
-//                    txa();
-//                    break;
-                case OPCODE_STA_ABSOLUTE:
-                    staAbsolute();
-                    break;
-                case OPCODE_BCC:
-                    bcc();
-                    break;
-//                case OPCODE_STA_INDIRECT_Y:
-//                    staIndirectY();
-//                    break;
-                case OPCODE_STA_ZERO_PAGE_X:
-                    staZeroPageX();
-                    break;
-//                case OPCODE_TYA:
-//                    tya();
-//                    break;
-                case OPCODE_TXS:
-                    txs();
-                    break;
-                case OPCODE_LDY_IMMEDIATE:
-                    ldyImmediate();
-                    break;
-                case OPCODE_LDX_IMMEDIATE:
-                    ldxImmediate();
-                    break;
-                case OPCODE_LDA_ZERO_PAGE:
-                    ldaZeroPage();
-                    break;
-                case OPCODE_LDA_IMMEDIATE:
-                    ldaImmediate();
-                    break;
-                case OPCODE_LDA_ABSOLUTE:
-                    ldaAbsolute();
-                    break;
-                case OPCODE_LDA_ABSOLUTE_X:
-                    ldaAbsoluteX();
-                    break;
-                case OPCODE_CPY_IMMEDIATE:
-                    cpyImmediate();
-                    break;
-                case OPCODE_DEX:
-                    dex();
-                    break;
-                case OPCODE_BNE:
-                    bne();
-                    break;
-                case OPCODE_CLD:
-                    cld();
-                    break;
-                case OPCODE_CMP_ABSOLUTE_X:
-                    cmpAbsoluteX();
-                    break;
-                case OPCODE_INX:
-                    inx();
-                    break;
-                default:
-                    logger.info(String.format("%04X: OpCode $%02X not implemented", pc, opcode));
-                    running = false;
-            }
+            running = executeStep();
         }
-
         logger.info(String.format("Program ended after %d operations run", opsCount));
+    }
+
+
+    public static boolean executeStep() {
+        int opcode = signedToUsignedByte(MMU.readAddress(pc));
+
+        switch (Opcode.fromCode(opcode)) {
+            case BRK:
+                cycleCounter += brk();
+                break;
+            case BPL:
+                cycleCounter += bpl();
+                break;
+            case BMI:
+                cycleCounter += bmi();
+                break;
+            case JSR:
+                cycleCounter += jsr();
+                break;
+//                case PHA:
+//                    cycleCounter += pha();
+//                    break;
+            case JMP_ABSOLUTE:
+                cycleCounter += jmpAbsolute();
+                break;
+            case SEI:
+                sei();
+                break;
+            case STY_ZERO_PAGE:
+                styZeroPage();
+                break;
+            case STA_ZERO_PAGE:
+                staZeroPage();
+                break;
+//                case DEY:
+//                    cycleCounter += dey();
+//                    break;
+//                case TXA:
+//                    cycleCounter += txa();
+//                    break;
+            case STA_ABSOLUTE:
+                staAbsolute();
+                break;
+            case BCC:
+                bcc();
+                break;
+//                case STA_INDIRECT_Y:
+//                    cycleCounter += staIndirectY();
+//                    break;
+            case STA_ZERO_PAGE_X:
+                staZeroPageX();
+                break;
+//                case TYA:
+//                    cycleCounter += tya();
+//                    break;
+            case TXS:
+                txs();
+                break;
+            case LDY_IMMEDIATE:
+                ldyImmediate();
+                break;
+            case LDX_IMMEDIATE:
+                ldxImmediate();
+                break;
+            case LDA_ZERO_PAGE:
+                ldaZeroPage();
+                break;
+            case LDA_IMMEDIATE:
+                ldaImmediate();
+                break;
+            case LDA_ABSOLUTE:
+                ldaAbsolute();
+                break;
+            case LDA_ABSOLUTE_X:
+                ldaAbsoluteX();
+                break;
+            case CPY_IMMEDIATE:
+                cpyImmediate();
+                break;
+            case DEX:
+                dex();
+                break;
+            case BNE:
+                bne();
+                break;
+            case CLD:
+                cld();
+                break;
+            case CMP_ABSOLUTE_X:
+                cmpAbsoluteX();
+                break;
+            case INX:
+                inx();
+                break;
+            default:
+                logger.info(String.format("%04X: OpCode $%02X not implemented", pc, opcode));
+                return false;
+        }
+        return true;
     }
 
     static boolean isStatusFlagSet(int flagIndex) {
@@ -183,16 +180,20 @@ public class CPU {
         p &= ~(1 << flagIndex);
     }
 
-    static void bmi() {
-        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+    static int bmi() {
+        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
         if (isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
+        notifyInstruction(Opcode.BMI, cycles);
         logger.info(String.format("%04X: BMI (%d cycles)", pc, cycles));
+
         pc += offset;
+
+        return cycles;
     }
 
     static void bcc() {
@@ -204,11 +205,13 @@ public class CPU {
             offset += MMU.readAddress(pc + 1);
         }
         logger.info(String.format("%04X: BCC (%d cycles)", pc, cycles));
+        notifyInstruction(Opcode.BCC, cycles);
+
         pc += offset;
     }
 
-    static void bpl() {
-        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+    static int bpl() {
+        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
         if (!isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
@@ -217,6 +220,8 @@ public class CPU {
         }
         logger.info(String.format("%04X: BPL (%d cycles)", pc, cycles));
         pc += offset;
+
+        return cycles;
     }
 
     static void sei() {
@@ -235,11 +240,13 @@ public class CPU {
         pc += 2;
     }
 
-    static void jmpAbsolute() {
+    static int jmpAbsolute() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
         logger.info(String.format("%04X: JMP $%04X (3 cycles)", pc, address));
 
         pc = address;
+
+        return 3;
     }
 
     private static void pha() {
@@ -276,6 +283,7 @@ public class CPU {
 
     static void ldaAbsoluteX() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        notifyInstruction(Opcode.LDA_ABSOLUTE_X, 4, address);
         logger.info(String.format("%04X: LDA $%04X, X (4 cycles)", pc, address));
 
         a = MMU.readAddress(address + x);
@@ -285,6 +293,7 @@ public class CPU {
 
     static void ldaImmediate() {
         int value = MMU.readAddress(pc + 1);
+        notifyInstruction(Opcode.LDA_IMMEDIATE, 2, value);
         logger.info(String.format("%04X: LDA #$%02X (2 cycles)", pc, value));
 
         a = value;
@@ -294,6 +303,7 @@ public class CPU {
 
     static void ldaZeroPage() {
         int address = MMU.readAddress(pc + 1);
+        notifyInstruction(Opcode.LDA_ZERO_PAGE, 2, address);
         logger.info(String.format("%04X: LDA $%02X (2 cycles)", pc, address));
 
         a = MMU.readAddress(address);
@@ -351,13 +361,15 @@ public class CPU {
         pc += 2;
     }
 
-    static void jsr() {
+    static int jsr() {
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
         logger.info(String.format("%04X: JSR $%04X (6 cycles)", pc, address));
 
         push2BytesToStack(pc + 3);
 
         pc = address;
+
+        return 6;
     }
 
     private static void dey() {
@@ -448,7 +460,7 @@ public class CPU {
         pc += 3;
     }
 
-    static void brk() {
+    static int brk() {
         logger.info(String.format("%04X: BRK (7 cycles)", pc));
 
         setStatusFlag(STATUS_FLAG_BREAK);
@@ -460,6 +472,8 @@ public class CPU {
         int newPCAddress = littleEndianToInt(MMU.readAddress(0xFFFE), MMU.readAddress(0xFFFF));
 
         pc = newPCAddress;
+
+        return 7;
     }
 
     static void oraImmediate() {

@@ -1,5 +1,7 @@
-package nesemulator;
+package nesemulator.cpu;
 
+import nesemulator.MMU;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -172,8 +174,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bpl();
+        int cycles = CPU.bpl();
 
+        assertEquals(3, cycles);
         assertEquals(0x32, CPU.pc);
     }
 
@@ -184,8 +187,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bpl();
+        int cycles = CPU.bpl();
 
+        assertEquals(2, cycles);
         assertEquals(0x02, CPU.pc);
     }
 
@@ -196,8 +200,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bmi();
+        int cycles = CPU.bmi();
 
+        assertEquals(3, cycles);
         assertEquals(0x32, CPU.pc);
     }
 
@@ -208,8 +213,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bmi();
+        int cycles = CPU.bmi();
 
+        assertEquals(2, cycles);
         assertEquals(0x02, CPU.pc);
     }
 
@@ -618,8 +624,9 @@ class CPUTest {
         int oldPCByte1 = (CPU.pc & 0xFF);
         int oldPCByte2 = ((CPU.pc >> 8) & 0xFF);
 
-        CPU.brk();
+        int cycles = CPU.brk();
 
+        assertEquals(7, cycles);
         assertEquals(oldStackPointer - 3, CPU.s);
         assertEquals(oldProcessorStatus, MMU.readAddress(0x0100 + CPU.s + 1));
         assertEquals(oldPCByte1, MMU.readAddress(0x0100 + CPU.s + 2));
@@ -634,8 +641,9 @@ class CPUTest {
         MMU.writeAddress(0x01, 0xAD);
         MMU.writeAddress(0x02, 0xDE);
 
-        CPU.jmpAbsolute();
+        int cycles = CPU.jmpAbsolute();
 
+        assertEquals(3, cycles);
         assertEquals(0xDEAD, CPU.pc);
     }
 
@@ -671,8 +679,9 @@ class CPUTest {
         MMU.writeAddress(0x04, destination2);
         MMU.writeAddress(0x05, destination1);
 
-        CPU.jsr();
+        int cycles = CPU.jsr();
 
+        assertEquals(6, cycles);
         assertEquals(0xDEAD, CPU.pc);
         assertEquals(0x06, MMU.readAddress(0x0100 + CPU.s + 1));
         assertEquals(0x00, MMU.readAddress(0x0100 + CPU.s + 2));
