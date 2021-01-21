@@ -11,5 +11,6 @@ public enum AddressingMode {
     Indirect,
     PreIndexedIndirect,
     IndirectY,
-    Relative, AbsoluteX;
+    Relative,
+    AbsoluteX;
 }

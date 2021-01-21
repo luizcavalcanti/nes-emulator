@@ -187,13 +187,13 @@ public class CPU {
         // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
+        final int value = MMU.readAddress(pc + 1);
         if (isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
-            offset += MMU.readAddress(pc + 1);
+            offset += value;
         }
 
-        logger.info(String.format("%04X: BMI (%d cycles)", pc, cycles));
-        notifyInstruction(Opcode.BMI, cycles);
+        notifyInstruction(Opcode.BMI, cycles, value);
 
         pc += offset;
 
@@ -204,13 +204,13 @@ public class CPU {
         // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
+        final int value = MMU.readAddress(pc + 1);
         if (!isStatusFlagSet(STATUS_FLAG_CARRY)) {
             cycles += 1;
-            offset += MMU.readAddress(pc + 1);
+            offset += value;
         }
 
-        logger.info(String.format("%04X: BCC (%d cycles)", pc, cycles));
-        notifyInstruction(Opcode.BCC, cycles);
+        notifyInstruction(Opcode.BCC, cycles, value);
 
         pc += offset;
 
@@ -221,13 +221,13 @@ public class CPU {
         // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
+        final int value = MMU.readAddress(pc + 1);
         if (!isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
-            offset += MMU.readAddress(pc + 1);
+            offset += value;
         }
 
-        logger.info(String.format("%04X: BPL (%d cycles)", pc, cycles));
-        notifyInstruction(Opcode.BPL, cycles);
+        notifyInstruction(Opcode.BPL, cycles, value);
 
         pc += offset;
 
@@ -236,7 +236,7 @@ public class CPU {
 
     static int sei() {
         final int cycles = 2;
-        logger.info(String.format("%04X: SEI (2 cycles)", pc));
+
         notifyInstruction(Opcode.SEI, cycles);
 
         setStatusFlag(STATUS_FLAG_INTERRUPT);
@@ -248,8 +248,8 @@ public class CPU {
     static int ldxImmediate() {
         final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
-        logger.info(String.format("%04X: LDX #$%02X (2 cycles)", pc, value));
-        notifyInstruction(Opcode.LDX_IMMEDIATE, cycles);
+
+        notifyInstruction(Opcode.LDX_IMMEDIATE, cycles, value);
 
         CPU.x = value;
         setNonPositiveFlags(x);
@@ -261,7 +261,6 @@ public class CPU {
     static int jmpAbsolute() {
         final int cycles = 3;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        logger.info(String.format("%04X: JMP $%04X (3 cycles)", pc, address));
         notifyInstruction(Opcode.JMP_ABSOLUTE, cycles, address);
 
         pc = address;
@@ -269,34 +268,38 @@ public class CPU {
         return cycles;
     }
 
-    private static void pha() {
-        MMU.writeAddress(s, a);
-        s--;
+//    private static void pha() {
+//        final int cycles = 3;
+//
+//        notifyInstruction(Opcode.PHA, cycles);
+//
+//        MMU.writeAddress(s, a);
+//        s--;
+//        pc += 1;
+//    }
 
-        logger.info(String.format("%04X: PHA (3 cycles)", pc));
+//    private static void txa() {
+//        final int cycles = 2;
+//
+//        notifyInstruction(Opcode.TXA, cycles);
+//
+//        a = x;
+//        pc += 1;
+//    }
 
-        pc += 1;
-    }
-
-    private static void txa() {
-        logger.info(String.format("%04X: TXA (2 cycles)", pc));
-
-        a = x;
-        pc += 1;
-    }
-
-    private static void tya() {
-        logger.info(String.format("%04X: TYA (2 cycles)", pc));
-
-        a = y;
-        pc += 1;
-    }
+//    private static void tya() {
+//        final int cycles = 2;
+//
+//        notifyInstruction(Opcode.TYA, cycles);
+//
+//        a = y;
+//        pc += 1;
+//    }
 
     static int ldaAbsolute() {
         final int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        logger.info(String.format("%04X: LDA $%04X (4 cycles)", pc, address));
         notifyInstruction(Opcode.LDA_ABSOLUTE, cycles, address);
 
         a = MMU.readAddress(address);
@@ -310,7 +313,6 @@ public class CPU {
         final int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        logger.info(String.format("%04X: LDA $%04X, X (4 cycles)", pc, address));
         notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, address);
 
         a = MMU.readAddress(address + x);
@@ -324,7 +326,6 @@ public class CPU {
         final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
 
-        logger.info(String.format("%04X: LDA #$%02X (2 cycles)", pc, value));
         notifyInstruction(Opcode.LDA_IMMEDIATE, cycles, value);
 
         a = value;
@@ -336,9 +337,8 @@ public class CPU {
 
     static int ldaZeroPage() {
         final int cycles = 2;
-        int address = MMU.readAddress(pc + 1);
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
 
-        logger.info(String.format("%04X: LDA $%02X (2 cycles)", pc, address));
         notifyInstruction(Opcode.LDA_ZERO_PAGE, cycles, address);
 
         a = MMU.readAddress(address);
@@ -352,7 +352,6 @@ public class CPU {
         final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
 
-        logger.info(String.format("%04X: LDY #$%02X (2 cycles)", pc, value));
         notifyInstruction(Opcode.LDY_IMMEDIATE, cycles, value);
 
         y = value;
@@ -366,7 +365,6 @@ public class CPU {
         final int cycles = 4;
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        logger.info(String.format("%04X: STA $%04X (4 cycles)", pc, value));
         notifyInstruction(Opcode.STA_ABSOLUTE, cycles, value);
 
         MMU.writeAddress(value, a);
@@ -375,23 +373,24 @@ public class CPU {
         return cycles;
     }
 
-    private static void staIndirectY() {
-        int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
-        logger.info(String.format("%04X: STA ($%04X), Y (5 cycles)", pc, addressLSB));
-        //TODO add 1 cycle if page boundary is crossed
-
-        MMU.writeAddress(addressLSB + y, a);
-        pc += 2;
-    }
+//    private static void staIndirectY() {
+//        //TODO: add 1 cycle if page boundary is crossed
+//        int cycles = 5;
+//        int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
+//
+//        notifyInstruction(Opcode.STA_INDIRECT_Y, cycles, addressLSB);
+//
+//        MMU.writeAddress(addressLSB + y, a);
+//        pc += 2;
+//    }
 
     static int styZeroPage() {
         final int cycles = 3;
-        int value = signedToUsignedByte(MMU.readAddress(pc + 1));
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
 
-        logger.info(String.format("%04X: STY $%X (3 cycles)", pc, value));
-        notifyInstruction(Opcode.STY_ZERO_PAGE, cycles, value);
+        notifyInstruction(Opcode.STY_ZERO_PAGE, cycles, address);
 
-        MMU.writeAddress(value, y);
+        MMU.writeAddress(address, y);
         pc += 2;
 
         return cycles;
@@ -399,12 +398,11 @@ public class CPU {
 
     static int staZeroPage() {
         final int cycles = 3;
-        int value = signedToUsignedByte(MMU.readAddress(pc + 1));
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
 
-        logger.info(String.format("%04X: STA $%02X (3 cycles)", pc, value));
-        notifyInstruction(Opcode.STA_ZERO_PAGE, cycles, value);
+        notifyInstruction(Opcode.STA_ZERO_PAGE, cycles, address);
 
-        MMU.writeAddress(value, a);
+        MMU.writeAddress(address, a);
         pc += 2;
 
         return cycles;
@@ -414,7 +412,6 @@ public class CPU {
         final int cycles = 4;
         int address = signedToUsignedByte(MMU.readAddress(pc + 1));
 
-        logger.info(String.format("%04X: STA $%02X, X (4 cycles)", pc, address));
         notifyInstruction(Opcode.STA_ZERO_PAGE_X, cycles, address);
 
         MMU.writeAddress(address + CPU.x, CPU.a);
@@ -428,7 +425,6 @@ public class CPU {
 
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        logger.info(String.format("%04X: JSR $%04X (6 cycles)", pc, address));
         notifyInstruction(Opcode.JSR, cycles, address);
 
         push2BytesToStack(pc + 3);
@@ -454,13 +450,13 @@ public class CPU {
         // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
+        final int value = MMU.readAddress(pc + 1);
         if (!isStatusFlagSet(STATUS_FLAG_ZERO)) {
             cycles += 1;
-            offset += MMU.readAddress(pc + 1);
+            offset += value;
         }
 
-        logger.info(String.format("%04X: BNE (%d cycles)", pc, cycles));
-        notifyInstruction(Opcode.BNE, cycles);
+        notifyInstruction(Opcode.BNE, cycles, value);
 
         pc += offset;
 
@@ -470,7 +466,6 @@ public class CPU {
     static int cld() {
         final int cycles = 2;
 
-        logger.info(String.format("%04X: CLD (2 cycles)", pc));
         notifyInstruction(Opcode.CLD, cycles);
 
         unsetStatusFlag(STATUS_FLAG_DECIMAL);
@@ -480,18 +475,19 @@ public class CPU {
     }
 
     static int txs() {
-        logger.info(String.format("%04X: TXS (2 cycles)", pc));
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.TXS, cycles);
 
         s = x;
         pc += 1;
 
-        return 2;
+        return cycles;
     }
 
     static int inx() {
         final int cycles = 2;
 
-        logger.info(String.format("%04X: INX (2 cycles)", pc));
         notifyInstruction(Opcode.INX, cycles);
 
         x++;
@@ -504,7 +500,6 @@ public class CPU {
     static int dex() {
         final int cycles = 2;
 
-        logger.info(String.format("%04X: DEX (2 cycles)", pc));
         notifyInstruction(Opcode.DEX, cycles);
 
         x--;
@@ -518,7 +513,6 @@ public class CPU {
         final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
 
-        logger.info(String.format("%04X: CPY #$%X (2 cycles)", pc, value));
         notifyInstruction(Opcode.CPY_IMMEDIATE, cycles, value);
 
         var result = CPU.y - value;
@@ -541,7 +535,6 @@ public class CPU {
         int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        logger.info(String.format("%04X: CMP $%04X, X (4 cycles)", pc, address));
         notifyInstruction(Opcode.CMP_ABSOLUTE_X, cycles, address);
 
         var value = MMU.readAddress(address + x);
@@ -564,8 +557,7 @@ public class CPU {
     static int brk() {
         final int cycles = 7;
 
-        logger.info(String.format("%04X: BRK (7 cycles)", pc));
-        notifyInstruction(Opcode.LDA_ZERO_PAGE, cycles);
+        notifyInstruction(Opcode.BRK, cycles);
 
         setStatusFlag(STATUS_FLAG_BREAK);
 
@@ -584,8 +576,7 @@ public class CPU {
         final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
 
-//        logger.info(String.format("%04X: ORA #$%02X (2 cycles)", pc, value));
-        notifyInstruction(Opcode.ORA, cycles, value);
+        notifyInstruction(Opcode.ORA_IMMEDIATE, cycles, value);
 
         a |= value;
         setNonPositiveFlags(a);

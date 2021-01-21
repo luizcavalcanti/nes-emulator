@@ -57,4 +57,12 @@ public enum Opcode {
     public static Opcode fromCode(int opcode) {
         return enumMap.get(opcode);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public AddressingMode getAddressingMode() {
+        return addressingMode;
+    }
 }
