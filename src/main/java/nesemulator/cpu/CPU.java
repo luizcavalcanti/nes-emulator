@@ -77,6 +77,9 @@ public class CPU {
             case BRK:
                 cycleCounter += brk();
                 break;
+            case ORA:
+                cycleCounter += oraImmediate();
+                break;
             case BPL:
                 cycleCounter += bpl();
                 break;
@@ -93,13 +96,13 @@ public class CPU {
                 cycleCounter += jmpAbsolute();
                 break;
             case SEI:
-                sei();
+                cycleCounter += sei();
                 break;
             case STY_ZERO_PAGE:
-                styZeroPage();
+                cycleCounter += styZeroPage();
                 break;
             case STA_ZERO_PAGE:
-                staZeroPage();
+                cycleCounter += staZeroPage();
                 break;
 //                case DEY:
 //                    cycleCounter += dey();
@@ -108,58 +111,58 @@ public class CPU {
 //                    cycleCounter += txa();
 //                    break;
             case STA_ABSOLUTE:
-                staAbsolute();
+                cycleCounter += staAbsolute();
                 break;
             case BCC:
-                bcc();
+                cycleCounter += bcc();
                 break;
 //                case STA_INDIRECT_Y:
 //                    cycleCounter += staIndirectY();
 //                    break;
             case STA_ZERO_PAGE_X:
-                staZeroPageX();
+                cycleCounter += staZeroPageX();
                 break;
 //                case TYA:
 //                    cycleCounter += tya();
 //                    break;
             case TXS:
-                txs();
+                cycleCounter += txs();
                 break;
             case LDY_IMMEDIATE:
-                ldyImmediate();
+                cycleCounter += ldyImmediate();
                 break;
             case LDX_IMMEDIATE:
-                ldxImmediate();
+                cycleCounter += ldxImmediate();
                 break;
             case LDA_ZERO_PAGE:
-                ldaZeroPage();
+                cycleCounter += ldaZeroPage();
                 break;
             case LDA_IMMEDIATE:
-                ldaImmediate();
+                cycleCounter += ldaImmediate();
                 break;
             case LDA_ABSOLUTE:
-                ldaAbsolute();
+                cycleCounter += ldaAbsolute();
                 break;
             case LDA_ABSOLUTE_X:
-                ldaAbsoluteX();
+                cycleCounter += ldaAbsoluteX();
                 break;
             case CPY_IMMEDIATE:
-                cpyImmediate();
+                cycleCounter += cpyImmediate();
                 break;
             case DEX:
-                dex();
+                cycleCounter += dex();
                 break;
             case BNE:
-                bne();
+                cycleCounter += bne();
                 break;
             case CLD:
-                cld();
+                cycleCounter += cld();
                 break;
             case CMP_ABSOLUTE_X:
-                cmpAbsoluteX();
+                cycleCounter += cmpAbsoluteX();
                 break;
             case INX:
-                inx();
+                cycleCounter += inx();
                 break;
             default:
                 logger.info(String.format("%04X: OpCode $%02X not implemented", pc, opcode));
@@ -188,26 +191,30 @@ public class CPU {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
-        notifyInstruction(Opcode.BMI, cycles);
+
         logger.info(String.format("%04X: BMI (%d cycles)", pc, cycles));
+        notifyInstruction(Opcode.BMI, cycles);
 
         pc += offset;
 
         return cycles;
     }
 
-    static void bcc() {
-        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+    static int bcc() {
+        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
         if (!isStatusFlagSet(STATUS_FLAG_CARRY)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
+
         logger.info(String.format("%04X: BCC (%d cycles)", pc, cycles));
         notifyInstruction(Opcode.BCC, cycles);
 
         pc += offset;
+
+        return cycles;
     }
 
     static int bpl() {
@@ -218,35 +225,48 @@ public class CPU {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
+
         logger.info(String.format("%04X: BPL (%d cycles)", pc, cycles));
+        notifyInstruction(Opcode.BPL, cycles);
+
         pc += offset;
 
         return cycles;
     }
 
-    static void sei() {
+    static int sei() {
+        final int cycles = 2;
         logger.info(String.format("%04X: SEI (2 cycles)", pc));
+        notifyInstruction(Opcode.SEI, cycles);
 
         setStatusFlag(STATUS_FLAG_INTERRUPT);
         pc += 1;
+
+        return cycles;
     }
 
-    static void ldxImmediate() {
+    static int ldxImmediate() {
+        final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
         logger.info(String.format("%04X: LDX #$%02X (2 cycles)", pc, value));
+        notifyInstruction(Opcode.LDX_IMMEDIATE, cycles);
 
         CPU.x = value;
         setNonPositiveFlags(x);
         pc += 2;
+
+        return cycles;
     }
 
     static int jmpAbsolute() {
+        final int cycles = 3;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
         logger.info(String.format("%04X: JMP $%04X (3 cycles)", pc, address));
+        notifyInstruction(Opcode.JMP_ABSOLUTE, cycles, address);
 
         pc = address;
 
-        return 3;
+        return cycles;
     }
 
     private static void pha() {
@@ -272,63 +292,90 @@ public class CPU {
         pc += 1;
     }
 
-    static void ldaAbsolute() {
+    static int ldaAbsolute() {
+        final int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
         logger.info(String.format("%04X: LDA $%04X (4 cycles)", pc, address));
+        notifyInstruction(Opcode.LDA_ABSOLUTE, cycles, address);
 
         a = MMU.readAddress(address);
         setNonPositiveFlags(a);
         pc += 3;
+
+        return cycles;
     }
 
-    static void ldaAbsoluteX() {
+    static int ldaAbsoluteX() {
+        final int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        notifyInstruction(Opcode.LDA_ABSOLUTE_X, 4, address);
+
         logger.info(String.format("%04X: LDA $%04X, X (4 cycles)", pc, address));
+        notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, address);
 
         a = MMU.readAddress(address + x);
         setNonPositiveFlags(a);
         pc += 3;
+
+        return cycles;
     }
 
-    static void ldaImmediate() {
+    static int ldaImmediate() {
+        final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
-        notifyInstruction(Opcode.LDA_IMMEDIATE, 2, value);
+
         logger.info(String.format("%04X: LDA #$%02X (2 cycles)", pc, value));
+        notifyInstruction(Opcode.LDA_IMMEDIATE, cycles, value);
 
         a = value;
         setNonPositiveFlags(a);
         pc += 2;
+
+        return cycles;
     }
 
-    static void ldaZeroPage() {
+    static int ldaZeroPage() {
+        final int cycles = 2;
         int address = MMU.readAddress(pc + 1);
-        notifyInstruction(Opcode.LDA_ZERO_PAGE, 2, address);
+
         logger.info(String.format("%04X: LDA $%02X (2 cycles)", pc, address));
+        notifyInstruction(Opcode.LDA_ZERO_PAGE, cycles, address);
 
         a = MMU.readAddress(address);
         setNonPositiveFlags(a);
         pc += 2;
+
+        return cycles;
     }
 
-    static void ldyImmediate() {
+    static int ldyImmediate() {
+        final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
+
         logger.info(String.format("%04X: LDY #$%02X (2 cycles)", pc, value));
+        notifyInstruction(Opcode.LDY_IMMEDIATE, cycles, value);
 
         y = value;
         setNonPositiveFlags(y);
         pc += 2;
+
+        return cycles;
     }
 
-    static void staAbsolute() {
+    static int staAbsolute() {
+        final int cycles = 4;
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
         logger.info(String.format("%04X: STA $%04X (4 cycles)", pc, value));
+        notifyInstruction(Opcode.STA_ABSOLUTE, cycles, value);
 
         MMU.writeAddress(value, a);
         pc += 3;
+
+        return cycles;
     }
 
-    static void staIndirectY() {
+    private static void staIndirectY() {
         int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
         logger.info(String.format("%04X: STA ($%04X), Y (5 cycles)", pc, addressLSB));
         //TODO add 1 cycle if page boundary is crossed
@@ -337,95 +384,142 @@ public class CPU {
         pc += 2;
     }
 
-    static void styZeroPage() {
+    static int styZeroPage() {
+        final int cycles = 3;
         int value = signedToUsignedByte(MMU.readAddress(pc + 1));
+
         logger.info(String.format("%04X: STY $%X (3 cycles)", pc, value));
+        notifyInstruction(Opcode.STY_ZERO_PAGE, cycles, value);
 
         MMU.writeAddress(value, y);
         pc += 2;
+
+        return cycles;
     }
 
-    static void staZeroPage() {
+    static int staZeroPage() {
+        final int cycles = 3;
         int value = signedToUsignedByte(MMU.readAddress(pc + 1));
+
         logger.info(String.format("%04X: STA $%02X (3 cycles)", pc, value));
+        notifyInstruction(Opcode.STA_ZERO_PAGE, cycles, value);
 
         MMU.writeAddress(value, a);
         pc += 2;
+
+        return cycles;
     }
 
-    static void staZeroPageX() {
+    static int staZeroPageX() {
+        final int cycles = 4;
         int address = signedToUsignedByte(MMU.readAddress(pc + 1));
+
         logger.info(String.format("%04X: STA $%02X, X (4 cycles)", pc, address));
+        notifyInstruction(Opcode.STA_ZERO_PAGE_X, cycles, address);
 
         MMU.writeAddress(address + CPU.x, CPU.a);
         pc += 2;
+
+        return cycles;
     }
 
     static int jsr() {
+        final int cycles = 6;
+
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
         logger.info(String.format("%04X: JSR $%04X (6 cycles)", pc, address));
+        notifyInstruction(Opcode.JSR, cycles, address);
 
         push2BytesToStack(pc + 3);
 
         pc = address;
 
-        return 6;
+        return cycles;
     }
 
-    private static void dey() {
-        logger.info(String.format("%04X: DEY (2 cycles)", pc));
+//    private static void dey() {
+//        final int cycles = 2;
+//
+//        logger.info(String.format("%04X: DEY (2 cycles)", pc));
+//        notifyInstruction(Opcode.DEY, cycles);
+//
+//        y--;
+//        setNonPositiveFlags(y);
+//
+//        pc += 1;
+//    }
 
-        y--;
-        setNonPositiveFlags(y);
-
-        pc += 1;
-    }
-
-    static void bne() {
-        // Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+    static int bne() {
+        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
         var cycles = 2;
         var offset = 2;
         if (!isStatusFlagSet(STATUS_FLAG_ZERO)) {
             cycles += 1;
             offset += MMU.readAddress(pc + 1);
         }
+
         logger.info(String.format("%04X: BNE (%d cycles)", pc, cycles));
+        notifyInstruction(Opcode.BNE, cycles);
+
         pc += offset;
+
+        return cycles;
     }
 
-    static void cld() {
+    static int cld() {
+        final int cycles = 2;
+
         logger.info(String.format("%04X: CLD (2 cycles)", pc));
+        notifyInstruction(Opcode.CLD, cycles);
 
         unsetStatusFlag(STATUS_FLAG_DECIMAL);
         pc += 1;
+
+        return cycles;
     }
 
-    static void txs() {
+    static int txs() {
         logger.info(String.format("%04X: TXS (2 cycles)", pc));
 
         s = x;
         pc += 1;
+
+        return 2;
     }
 
-    static void inx() {
+    static int inx() {
+        final int cycles = 2;
+
         logger.info(String.format("%04X: INX (2 cycles)", pc));
+        notifyInstruction(Opcode.INX, cycles);
 
         x++;
         setNonPositiveFlags(x);
         pc += 1;
+
+        return cycles;
     }
 
-    static void dex() {
+    static int dex() {
+        final int cycles = 2;
+
         logger.info(String.format("%04X: DEX (2 cycles)", pc));
+        notifyInstruction(Opcode.DEX, cycles);
 
         x--;
         setNonPositiveFlags(x);
         pc += 1;
+
+        return cycles;
     }
 
-    static void cpyImmediate() {
+    static int cpyImmediate() {
+        final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
+
         logger.info(String.format("%04X: CPY #$%X (2 cycles)", pc, value));
+        notifyInstruction(Opcode.CPY_IMMEDIATE, cycles, value);
 
         var result = CPU.y - value;
         if (result > 0) {
@@ -438,12 +532,17 @@ public class CPU {
         }
 
         pc += 2;
+
+        return cycles;
     }
 
-    static void cmpAbsoluteX() {
+    static int cmpAbsoluteX() {
         // TODO: add +1 to cycle if page is crossed
+        int cycles = 4;
         int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
         logger.info(String.format("%04X: CMP $%04X, X (4 cycles)", pc, address));
+        notifyInstruction(Opcode.CMP_ABSOLUTE_X, cycles, address);
 
         var value = MMU.readAddress(address + x);
 
@@ -458,10 +557,15 @@ public class CPU {
         }
 
         pc += 3;
+
+        return cycles;
     }
 
     static int brk() {
+        final int cycles = 7;
+
         logger.info(String.format("%04X: BRK (7 cycles)", pc));
+        notifyInstruction(Opcode.LDA_ZERO_PAGE, cycles);
 
         setStatusFlag(STATUS_FLAG_BREAK);
 
@@ -473,17 +577,21 @@ public class CPU {
 
         pc = newPCAddress;
 
-        return 7;
+        return cycles;
     }
 
-    static void oraImmediate() {
+    static int oraImmediate() {
+        final int cycles = 2;
         int value = MMU.readAddress(pc + 1);
 
-        logger.info(String.format("%04X: ORA #$%02X (2 cycles)", pc, value));
+//        logger.info(String.format("%04X: ORA #$%02X (2 cycles)", pc, value));
+        notifyInstruction(Opcode.ORA, cycles, value);
 
         a |= value;
         setNonPositiveFlags(a);
         pc += 2;
+
+        return cycles;
     }
 
     private static int signedToUsignedByte(int b) {

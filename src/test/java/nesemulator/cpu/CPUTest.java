@@ -1,7 +1,6 @@
 package nesemulator.cpu;
 
 import nesemulator.MMU;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -62,8 +61,10 @@ class CPUTest {
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldaImmediate();
 
+        int cycles = CPU.ldaImmediate();
+
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -76,8 +77,10 @@ class CPUTest {
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldaImmediate();
 
+        int cycles = CPU.ldaImmediate();
+
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -90,8 +93,10 @@ class CPUTest {
         CPU.a = 0x01;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldaImmediate();
 
+        int cycles = CPU.ldaImmediate();
+
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -107,8 +112,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABCD, 0x00);
 
-        CPU.staAbsolute();
+        int cycles = CPU.staAbsolute();
 
+        assertEquals(4, cycles);
         assertEquals(0x99, MMU.readAddress(0xABCD));
         assertEquals(0x03, CPU.pc);
     }
@@ -123,8 +129,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABCD, value);
 
-        CPU.ldaAbsolute();
+        int cycles = CPU.ldaAbsolute();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -141,8 +148,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABCD, value);
 
-        CPU.ldaAbsolute();
+        int cycles = CPU.ldaAbsolute();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -159,8 +167,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABCD, value);
 
-        CPU.ldaAbsolute();
+        int cycles = CPU.ldaAbsolute();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -223,12 +232,14 @@ class CPUTest {
     void seiMustSetInterruptFlag() {
         CPU.pc = 0x00;
 
-        CPU.sei();
+        int cycles = CPU.sei();
+        assertEquals(2, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
-        CPU.sei();
+        cycles = CPU.sei();
+        assertEquals(2, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_INTERRUPT));
         assertEquals(0x02, CPU.pc);
     }
@@ -238,12 +249,14 @@ class CPUTest {
         CPU.pc = 0x00;
         CPU.setStatusFlag(CPU.STATUS_FLAG_DECIMAL);
 
-        CPU.cld();
+        int cycles = CPU.cld();
+        assertEquals(2, cycles);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x01, CPU.pc);
 
         // make sure is idempotent
-        CPU.cld();
+        cycles = CPU.cld();
+        assertEquals(2, cycles);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_DECIMAL));
         assertEquals(0x02, CPU.pc);
     }
@@ -254,8 +267,9 @@ class CPUTest {
         CPU.x = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldxImmediate();
+        int cycles = CPU.ldxImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -268,8 +282,9 @@ class CPUTest {
         CPU.x = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldxImmediate();
+        int cycles = CPU.ldxImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -282,8 +297,9 @@ class CPUTest {
         CPU.x = 0x01;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldxImmediate();
+        int cycles = CPU.ldxImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.x);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -296,8 +312,9 @@ class CPUTest {
         CPU.s = 0x0200;
         CPU.pc = 0x00;
 
-        CPU.txs();
+        int cycles = CPU.txs();
 
+        assertEquals(2, cycles);
         assertEquals(0x00AA, CPU.x);
         assertEquals(0x00AA, CPU.s);
         assertEquals(0x01, CPU.pc);
@@ -312,8 +329,9 @@ class CPUTest {
         MMU.writeAddress(0x01, 0x30);
         MMU.writeAddress(0x33, 0);
 
-        CPU.staZeroPageX();
+        int cycles = CPU.staZeroPageX();
 
+        assertEquals(4, cycles);
         assertEquals(0xAB, MMU.readAddress(0x33));
         assertEquals(0x02, CPU.pc);
     }
@@ -327,8 +345,9 @@ class CPUTest {
         MMU.writeAddress(address, 0);
         MMU.writeAddress(0x01, address);
 
-        CPU.staZeroPage();
+        int cycles = CPU.staZeroPage();
 
+        assertEquals(3, cycles);
         assertEquals(0xAB, MMU.readAddress(address));
         assertEquals(0x02, CPU.pc);
     }
@@ -342,8 +361,9 @@ class CPUTest {
         MMU.writeAddress(address, 0);
         MMU.writeAddress(0x01, address);
 
-        CPU.styZeroPage();
+        int cycles = CPU.styZeroPage();
 
+        assertEquals(3, cycles);
         assertEquals(0xAB, MMU.readAddress(address));
         assertEquals(0x02, CPU.pc);
     }
@@ -353,7 +373,9 @@ class CPUTest {
         CPU.x = 0x09;
         CPU.pc = 0x00;
 
-        CPU.inx();
+        int cycles = CPU.inx();
+
+        assertEquals(2, cycles);
         assertEquals(0x0A, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -365,7 +387,9 @@ class CPUTest {
         CPU.x = -1;
         CPU.pc = 0x00;
 
-        CPU.inx();
+        int cycles = CPU.inx();
+
+        assertEquals(2, cycles);
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -377,7 +401,9 @@ class CPUTest {
         CPU.x = -2;
         CPU.pc = 0x00;
 
-        CPU.inx();
+        int cycles = CPU.inx();
+
+        assertEquals(2, cycles);
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -392,8 +418,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bne();
+        int cycles = CPU.bne();
 
+        assertEquals(3, cycles);
         assertEquals(0x32, CPU.pc);
     }
 
@@ -404,8 +431,9 @@ class CPUTest {
 
         MMU.writeAddress(0x01, 0x30);
 
-        CPU.bne();
+        int cycles = CPU.bne();
 
+        assertEquals(2, cycles);
         assertEquals(0x02, CPU.pc);
     }
 
@@ -420,8 +448,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABD0, value);
 
-        CPU.ldaAbsoluteX();
+        int cycles = CPU.ldaAbsoluteX();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -439,8 +468,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABD0, value);
 
-        CPU.ldaAbsoluteX();
+        int cycles = CPU.ldaAbsoluteX();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -458,8 +488,9 @@ class CPUTest {
         MMU.writeAddress(0x02, 0xAB);
         MMU.writeAddress(0xABD0, value);
 
-        CPU.ldaAbsoluteX();
+        int cycles = CPU.ldaAbsoluteX();
 
+        assertEquals(4, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x03, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -472,8 +503,9 @@ class CPUTest {
         CPU.y = 0x09;
         MMU.writeAddress(0x01, 0x08);
 
-        CPU.cpyImmediate();
+        int cycles = CPU.cpyImmediate();
 
+        assertEquals(2, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -486,8 +518,9 @@ class CPUTest {
         CPU.y = 0x09;
         MMU.writeAddress(0x01, 0x09);
 
-        CPU.cpyImmediate();
+        int cycles = CPU.cpyImmediate();
 
+        assertEquals(2, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -500,8 +533,9 @@ class CPUTest {
         CPU.y = 0x09;
         MMU.writeAddress(0x01, 0x0F);
 
-        CPU.cpyImmediate();
+        int cycles = CPU.cpyImmediate();
 
+        assertEquals(2, cycles);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -521,8 +555,9 @@ class CPUTest {
         // actual value
         MMU.writeAddress(0x06, 0x08);
 
-        CPU.cmpAbsoluteX();
+        int cycles = CPU.cmpAbsoluteX();
 
+        assertEquals(4, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -542,8 +577,9 @@ class CPUTest {
         // actual value
         MMU.writeAddress(0x06, 0x09);
 
-        CPU.cmpAbsoluteX();
+        int cycles = CPU.cmpAbsoluteX();
 
+        assertEquals(4, cycles);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -563,8 +599,9 @@ class CPUTest {
         // actual value
         MMU.writeAddress(0x06, 0x0F);
 
-        CPU.cmpAbsoluteX();
+        int cycles = CPU.cmpAbsoluteX();
 
+        assertEquals(4, cycles);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -576,8 +613,9 @@ class CPUTest {
         CPU.x = 0x09;
         CPU.pc = 0x00;
 
-        CPU.dex();
+        int cycles = CPU.dex();
 
+        assertEquals(2, cycles);
         assertEquals(0x08, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -589,7 +627,9 @@ class CPUTest {
         CPU.x = 0x01;
         CPU.pc = 0x00;
 
-        CPU.dex();
+        int cycles = CPU.dex();
+
+        assertEquals(2, cycles);
         assertEquals(0x00, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -601,8 +641,9 @@ class CPUTest {
         CPU.x = 0x00;
         CPU.pc = 0x00;
 
-        CPU.dex();
+        int cycles = CPU.dex();
 
+        assertEquals(2, cycles);
         assertEquals(-1, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -654,8 +695,9 @@ class CPUTest {
         MMU.writeAddress(0x01, offset);
         CPU.unsetStatusFlag(CPU.STATUS_FLAG_CARRY);
 
-        CPU.bcc();
+        int cycles = CPU.bcc();
 
+        assertEquals(3, cycles);
         assertEquals(offset + 2, CPU.pc);
     }
 
@@ -666,8 +708,9 @@ class CPUTest {
         MMU.writeAddress(0x01, offset);
         CPU.setStatusFlag(CPU.STATUS_FLAG_CARRY);
 
-        CPU.bcc();
+        int cycles = CPU.bcc();
 
+        assertEquals(2, cycles);
         assertEquals(0x02, CPU.pc);
     }
 
@@ -696,8 +739,9 @@ class CPUTest {
         MMU.writeAddress(0x01, address);
         MMU.writeAddress(0xFD, value);
 
-        CPU.ldaZeroPage();
+        int cycles = CPU.ldaZeroPage();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -713,8 +757,9 @@ class CPUTest {
         MMU.writeAddress(0x01, address);
         MMU.writeAddress(0xFD, value);
 
-        CPU.ldaZeroPage();
+        int cycles = CPU.ldaZeroPage();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -728,8 +773,9 @@ class CPUTest {
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
 
-        CPU.ldaZeroPage();
+        int cycles = CPU.ldaZeroPage();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.a);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -743,8 +789,9 @@ class CPUTest {
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
 
-        CPU.oraImmediate();
+        int cycles = CPU.oraImmediate();
 
+        assertEquals(2, cycles);
         assertEquals((byte) 0b11111111, CPU.a);
         assertEquals(0x02, CPU.pc);
     }
@@ -755,8 +802,9 @@ class CPUTest {
         CPU.y = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldyImmediate();
+        int cycles = CPU.ldyImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.y);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
@@ -769,8 +817,9 @@ class CPUTest {
         CPU.y = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldyImmediate();
+        int cycles = CPU.ldyImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.y);
         assertEquals(0x02, CPU.pc);
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -783,8 +832,9 @@ class CPUTest {
         CPU.y = 0x01;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
-        CPU.ldyImmediate();
+        int cycles = CPU.ldyImmediate();
 
+        assertEquals(2, cycles);
         assertEquals(value, CPU.y);
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
