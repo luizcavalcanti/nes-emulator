@@ -21,7 +21,7 @@ public class CPU {
 
     private static final int INITIAL_PC = 0x8000;
     private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
-    private static final int INITIAL_STACK_POINTER = 0xFD;
+    private static final int INITIAL_STACK_POINTER = 0xFF;
 
     private static final Logger logger = LoggerFactory.getLogger(CPU.class);
 

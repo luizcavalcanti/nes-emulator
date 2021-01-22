@@ -8,8 +8,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -25,6 +27,7 @@ public class InspectionUI extends Application implements CPUObserver {
 
     public static final int REGISTER_FONT_SIZE = 30;
     public static final Font REGISTER_FONT = Font.font("Monospace", REGISTER_FONT_SIZE);
+    public static final int LABELS_FONT_SIZE = 14;
     private ListView<String> logListView;
     private Label aLabel;
     private Label xLabel;
@@ -33,6 +36,7 @@ public class InspectionUI extends Application implements CPUObserver {
     private Label pcLabel;
     private Label sLabel;
     private ListView<String> stackListView;
+    private TextField instructionCountField;
 
     public static void main(String[] args) {
         launch();
@@ -48,16 +52,36 @@ public class InspectionUI extends Application implements CPUObserver {
     }
 
     private Scene buildScene() {
-        // Controls
-        var nextInstructionButton = new Button("Next instruction");
-        nextInstructionButton.setOnAction(this::handleNextInstructionAction);
+        var windowPane = new BorderPane();
+        windowPane.setTop(buildControlsPane());
+        windowPane.setLeft(buildInstructionsPane());
+        windowPane.setCenter(buildRegistersPane());
+        windowPane.setRight(buildStackPane());
+        return new Scene(windowPane, 800, 600); //, 300, 275
+    }
+
+    private Pane buildControlsPane() {
+        var executeButton = new Button("Execute");
+        var instructionsLabel = new Label("Instructions:");
+        instructionsLabel.setFont(Font.font(LABELS_FONT_SIZE));
+        instructionCountField = new TextField("1");
+        instructionCountField.setMaxWidth(60);
+        executeButton.setOnAction(this::handleNextXInstructionsAction);
+
         var controlsPane = new FlowPane();
         controlsPane.setPadding(new Insets(10, 0, 10, 0));
         controlsPane.setHgap(20);
         controlsPane.setAlignment(Pos.CENTER);
-        controlsPane.getChildren().add(nextInstructionButton);
+        controlsPane.getChildren().add(instructionsLabel);
+        controlsPane.getChildren().add(instructionCountField);
+        controlsPane.getChildren().add(executeButton);
+        return controlsPane;
+    }
 
-        // CPU Regsters
+    private Pane buildRegistersPane() {
+        var registersLabel = new Label("CPU Registers:");
+        registersLabel.setFont(Font.font(LABELS_FONT_SIZE));
+
         aLabel = new Label("A:  -");
         aLabel.setFont(REGISTER_FONT);
         xLabel = new Label("X:  -");
@@ -72,30 +96,44 @@ public class InspectionUI extends Application implements CPUObserver {
         pLabel.setFont(REGISTER_FONT);
         Label pHelpLabel = new Label("    NV1BDIZC");
         pHelpLabel.setFont(REGISTER_FONT);
-        pHelpLabel.setPadding(new Insets(-20,0,0,0));
+        pHelpLabel.setPadding(new Insets(-20, 0, 0, 0));
 
-        var registersPane = new VBox();
-        registersPane.setPadding(new Insets(5));
-        registersPane.setMinWidth(200);
-        registersPane.setSpacing(10);
-        registersPane.getChildren().add(pcLabel);
-        registersPane.getChildren().add(aLabel);
-        registersPane.getChildren().add(xLabel);
-        registersPane.getChildren().add(yLabel);
-        registersPane.getChildren().add(sLabel);
-        registersPane.getChildren().add(pLabel);
-        registersPane.getChildren().add(pHelpLabel);
+        var fieldsPane = new VBox();
+        fieldsPane.setPadding(new Insets(5));
+        fieldsPane.setMinWidth(200);
+        fieldsPane.setSpacing(10);
+        fieldsPane.getChildren().add(pcLabel);
+        fieldsPane.getChildren().add(aLabel);
+        fieldsPane.getChildren().add(xLabel);
+        fieldsPane.getChildren().add(yLabel);
+        fieldsPane.getChildren().add(sLabel);
+        fieldsPane.getChildren().add(pLabel);
+        fieldsPane.getChildren().add(pHelpLabel);
 
+        var registerPane = new BorderPane();
+        registerPane.setTop(registersLabel);
+        registerPane.setCenter(fieldsPane);
+        return registerPane;
+    }
+
+    private Pane buildStackPane() {
         stackListView = new ListView<>();
+        var stackPane = new BorderPane();
+        var stackLabel = new Label("Stack:");
+        stackLabel.setFont(Font.font(LABELS_FONT_SIZE));
+        stackPane.setTop(stackLabel);
+        stackPane.setCenter(stackListView);
+        return stackPane;
+    }
 
+    private Pane buildInstructionsPane() {
         logListView = new ListView<>();
-        var windowPane = new BorderPane();
-        windowPane.setTop(controlsPane);
-        windowPane.setLeft(logListView);
-        windowPane.setCenter(registersPane);
-        windowPane.setRight(stackListView);
-        windowPane.setPadding(new Insets(10, 0, 0, 0));
-        return new Scene(windowPane, 800, 600); //, 300, 275
+        var instructionsPane = new BorderPane();
+        var instructionsLabel = new Label("Instructions:");
+        instructionsLabel.setFont(Font.font(LABELS_FONT_SIZE));
+        instructionsPane.setTop(instructionsLabel);
+        instructionsPane.setCenter(logListView);
+        return instructionsPane;
     }
 
     private void runStuff() {
@@ -110,8 +148,11 @@ public class InspectionUI extends Application implements CPUObserver {
         }
     }
 
-    private void handleNextInstructionAction(ActionEvent event) {
-        CPU.executeStep();
+    private void handleNextXInstructionsAction(ActionEvent event) {
+        int instructionsCount = Integer.parseInt(instructionCountField.getText().trim());
+        for (int i = 0; i < instructionsCount; i++) {
+            CPU.executeStep();
+        }
         updateRegisters();
         updateStack();
     }
@@ -128,7 +169,7 @@ public class InspectionUI extends Application implements CPUObserver {
     private void updateStack() {
         var memoryAddress = 0x0100 + CPU.getS();
         stackListView.getItems().clear();
-        for (int i = memoryAddress; i<0x0200; i++) {
+        for (int i = memoryAddress; i < 0x0200; i++) {
             stackListView.getItems().add(String.format("0x%02X", MMU.readAddress(i)));
         }
     }

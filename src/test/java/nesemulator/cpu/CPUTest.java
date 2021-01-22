@@ -23,7 +23,7 @@ class CPUTest {
 
     @Test
     void initializeMustSetStackPointerToHigherAddress() {
-        assertEquals(0xFD, CPU.s);
+        assertEquals(0xFF, CPU.s);
     }
 
     @Test
