@@ -5,9 +5,9 @@ import nesemulator.cpu.Opcode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CPULogObserver implements CPUObserver {
+public class LogCPUObserver implements CPUObserver {
 
-    static final Logger logger = LoggerFactory.getLogger(CPULogObserver.class);
+    static final Logger logger = LoggerFactory.getLogger(LogCPUObserver.class);
 
     @Override
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {

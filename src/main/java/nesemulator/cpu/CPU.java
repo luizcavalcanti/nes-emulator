@@ -37,6 +37,30 @@ public class CPU {
     private CPU() {
     }
 
+    public static int getA() {
+        return CPU.a;
+    }
+
+    public static int getX() {
+        return CPU.x;
+    }
+
+    public static int getY() {
+        return CPU.y;
+    }
+
+    public static int getS() {
+        return CPU.s;
+    }
+
+    public static int getP() {
+        return CPU.p;
+    }
+
+    public static int getPC() {
+        return CPU.pc;
+    }
+
     public static void addObserver(CPUObserver observer) {
         observers.add(observer);
     }

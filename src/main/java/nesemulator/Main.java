@@ -1,8 +1,6 @@
 package nesemulator;
 
 import nesemulator.cpu.CPU;
-import nesemulator.cpu.CPUObserver;
-import nesemulator.cpu.Opcode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,7 @@ public class Main {
             MMU.loadCart(cart);
             logger.info("Initializing CPU...");
             CPU.initialize();
-            CPU.addObserver(new CPULogObserver());
+            CPU.addObserver(new LogCPUObserver());
             logger.info("Executing...");
             CPU.execute();
         } catch (IOException e) {
