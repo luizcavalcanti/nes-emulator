@@ -137,6 +137,9 @@ public class CPU {
             case STA_ZERO_PAGE:
                 cycleCounter += staZeroPage();
                 break;
+            case STX_ZERO_PAGE:
+                cycleCounter += stxZeroPage();
+                break;
             case DEY:
                 cycleCounter += dey();
                 break;
@@ -148,6 +151,9 @@ public class CPU {
 //                    break;
             case STA_ABSOLUTE:
                 cycleCounter += staAbsolute();
+                break;
+            case STY_ABSOLUTE:
+                cycleCounter += styAbsolute();
                 break;
             case BCC:
                 cycleCounter += bcc();
@@ -161,6 +167,9 @@ public class CPU {
 //                case TYA:
 //                    cycleCounter += tya();
 //                    break;
+            case TAY:
+                cycleCounter += tay();
+                break;
             case TXS:
                 cycleCounter += txs();
                 break;
@@ -404,6 +413,19 @@ public class CPU {
         return cycles;
     }
 
+
+    static int styAbsolute() {
+        final int cycles = 4;
+        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
+        notifyInstruction(Opcode.STY_ABSOLUTE, cycles, value);
+
+        MMU.writeAddress(value, y);
+        pc += 3;
+
+        return cycles;
+    }
+
     static int staAbsolute() {
         final int cycles = 4;
         int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
@@ -446,6 +468,18 @@ public class CPU {
         notifyInstruction(Opcode.STA_ZERO_PAGE, cycles, address);
 
         MMU.writeAddress(address, a);
+        pc += 2;
+
+        return cycles;
+    }
+
+    static int stxZeroPage() {
+        final int cycles = 3;
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
+
+        notifyInstruction(Opcode.STX_ZERO_PAGE, cycles, address);
+
+        MMU.writeAddress(address, x);
         pc += 2;
 
         return cycles;
@@ -570,6 +604,18 @@ public class CPU {
         notifyInstruction(Opcode.TXS, cycles);
 
         s = x;
+        pc += 1;
+
+        return cycles;
+    }
+
+    static int tay() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.TXS, cycles);
+
+        y = a;
+        setNonPositiveFlags((byte) y);
         pc += 1;
 
         return cycles;

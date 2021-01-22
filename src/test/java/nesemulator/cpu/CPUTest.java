@@ -120,6 +120,22 @@ class CPUTest {
     }
 
     @Test
+    void styAbsoluteMustStoreTheAccumulatorContentIntoMemory() {
+        CPU.y = 0x99;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABCD, 0x00);
+
+        int cycles = CPU.styAbsolute();
+
+        assertEquals(4, cycles);
+        assertEquals(0x99, MMU.readAddress(0xABCD));
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
     void ldaAbsoluteMustLoadUnsignedValueFromMemoryPositionToRegisterA() {
         var value = 0x0D;
         CPU.a = 0x00;
@@ -321,6 +337,20 @@ class CPUTest {
     }
 
     @Test
+    void tayMustSetAccumulatorValueToYRegister() {
+        CPU.a = 0xAA;
+        CPU.y = 0x00;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.tay();
+
+        assertEquals(2, cycles);
+        assertEquals(0x00AA, CPU.a);
+        assertEquals(0x00AA, CPU.y);
+        assertEquals(0x01, CPU.pc);
+    }
+
+    @Test
     void staZeroPageXMustStoreRegisterAContentIntoMemoryAddressOffsetByX() {
         CPU.x = 0x03;
         CPU.a = 0xAB;
@@ -362,6 +392,22 @@ class CPUTest {
         MMU.writeAddress(0x01, address);
 
         int cycles = CPU.styZeroPage();
+
+        assertEquals(3, cycles);
+        assertEquals(0xAB, MMU.readAddress(address));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void stxZeroPageMustStoreRegisterXContentIntoMemoryAddress() {
+        int address = 0x99;
+        CPU.x = 0xAB;
+
+        CPU.pc = 0x00;
+        MMU.writeAddress(address, 0);
+        MMU.writeAddress(0x01, address);
+
+        int cycles = CPU.stxZeroPage();
 
         assertEquals(3, cycles);
         assertEquals(0xAB, MMU.readAddress(address));

@@ -11,8 +11,9 @@ in java 11 (because reasons).
 - Loading iNES 1.0 rom format with some headers
 - Basic mirroring for Cart PRG ROM and CPU RAM addresses
 - A functional CPU with some opcodes (implementing them as needed)
+- Basic inspection GUI for debugging purposes (run `make inspect`)
 
-Supported CPU Opcodes so far: 30 of 151
+Supported CPU Opcodes so far: 36 of 151
 
 ### What I'm working on right now?
 
@@ -24,5 +25,3 @@ Supported CPU Opcodes so far: 30 of 151
 - Fake PPU
 - Interrupts
 - Check for CHR RAM/ROM presence
-- Proper logging
-- Proper memory inspection
