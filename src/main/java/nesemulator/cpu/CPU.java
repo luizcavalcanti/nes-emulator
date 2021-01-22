@@ -137,9 +137,12 @@ public class CPU {
             case STA_ZERO_PAGE:
                 cycleCounter += staZeroPage();
                 break;
-//                case DEY:
-//                    cycleCounter += dey();
-//                    break;
+            case DEY:
+                cycleCounter += dey();
+                break;
+            case DEC_ZERO_PAGE:
+                cycleCounter += decZeroPage();
+                break;
 //                case TXA:
 //                    cycleCounter += txa();
 //                    break;
@@ -197,10 +200,14 @@ public class CPU {
             case CMP_ABSOLUTE_X:
                 cycleCounter += cmpAbsoluteX();
                 break;
+            case CMP_IMMEDIATE:
+                cycleCounter += cmpImmediate();
+                break;
             case INX:
                 cycleCounter += inx();
                 break;
             default:
+                logger.info(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));
                 break;
         }
         return true;
@@ -480,17 +487,35 @@ public class CPU {
         return cycles;
     }
 
-//    private static void dey() {
-//        final int cycles = 2;
-//
-//        logger.info(String.format("%04X: DEY (2 cycles)", pc));
-//        notifyInstruction(Opcode.DEY, cycles);
-//
-//        y--;
-//        setNonPositiveFlags(y);
-//
-//        pc += 1;
-//    }
+    static int dey() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.DEY, cycles);
+
+        y = (y - 1) & 0xFF;
+        setNonPositiveFlags((byte) y);
+
+        pc += 1;
+
+        return cycles;
+    }
+
+    static int decZeroPage() {
+        final int cycles = 5;
+
+        int address = signedToUsignedByte(MMU.readAddress(pc + 1));
+
+        notifyInstruction(Opcode.DEC_ZERO_PAGE, cycles, address);
+
+        int value = MMU.readAddress(address);
+        int newValue = (value - 1) & 0xFF;
+        MMU.writeAddress(address, newValue);
+        setNonPositiveFlags((byte) newValue);
+
+        pc += 2;
+
+        return cycles;
+    }
 
     static int bne() {
         // TODO: cycles +2 if to a new page
@@ -581,14 +606,7 @@ public class CPU {
         notifyInstruction(Opcode.CPY_IMMEDIATE, cycles, value);
 
         var result = CPU.y - value;
-        if (result > 0) {
-            setStatusFlag(STATUS_FLAG_CARRY);
-        } else if (result == 0) {
-            setStatusFlag(STATUS_FLAG_CARRY);
-            setStatusFlag(STATUS_FLAG_ZERO);
-        } else {
-            setStatusFlag(STATUS_FLAG_NEGATIVE);
-        }
+        setComparisonFlags(result);
 
         pc += 2;
 
@@ -605,6 +623,27 @@ public class CPU {
         var value = MMU.readAddress(address + x);
 
         var result = CPU.a - value;
+        setComparisonFlags(result);
+
+        pc += 3;
+
+        return cycles;
+    }
+
+    static int cmpImmediate() {
+        int cycles = 2;
+        int value = MMU.readAddress(pc + 1);
+
+        notifyInstruction(Opcode.CMP_IMMEDIATE, cycles, value);
+
+        var result = CPU.a - value;
+        setComparisonFlags(result);
+
+        pc += 2;
+        return cycles;
+    }
+
+    private static void setComparisonFlags(int result) {
         if (result > 0) {
             setStatusFlag(STATUS_FLAG_CARRY);
         } else if (result == 0) {
@@ -613,10 +652,6 @@ public class CPU {
         } else {
             setStatusFlag(STATUS_FLAG_NEGATIVE);
         }
-
-        pc += 3;
-
-        return cycles;
     }
 
     static int brk() {

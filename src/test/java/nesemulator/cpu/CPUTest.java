@@ -651,6 +651,48 @@ class CPUTest {
     }
 
     @Test
+    void deyMustDecrementRegisterYBy1() {
+        CPU.y = 0x09;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.dey();
+
+        assertEquals(2, cycles);
+        assertEquals(0x08, CPU.y);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void deyMustDecrementRegisterXBy1AndSetZeroFlagIfNewYIsZero() {
+        CPU.y = 0x01;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.dey();
+
+        assertEquals(2, cycles);
+        assertEquals(0x00, CPU.y);
+        assertEquals(0x01, CPU.pc);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void deyMustDecrementRegisterXBy1AndSetNegativeFlagIfNewYIsNegative() {
+        CPU.y = 0x00;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.dey();
+
+        assertEquals(2, cycles);
+        assertEquals(0xFF, CPU.y);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
     void brkMustSetBreakFlagAndPushProgramCounterToStack() {
         CPU.pc = 0x1234;
         CPU.setStatusFlag(CPU.STATUS_FLAG_CARRY);
@@ -889,4 +931,78 @@ class CPUTest {
         assertEquals(2, cycles);
         assertEquals(0x02, CPU.pc);
     }
+
+    @Test
+    void decZeroPageMustDecrementZeroPageMemoryAddressValueBy1AndSetFlagsAccordingly() {
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, 0x30);
+        MMU.writeAddress(0x30, 0x02);
+
+        int cycles = CPU.decZeroPage();
+        assertEquals(0x02, CPU.pc);
+        assertEquals(5, cycles);
+        assertEquals(0x01, MMU.readAddress(0x30));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+
+        CPU.pc = 0x00;
+        cycles = CPU.decZeroPage();
+        assertEquals(5, cycles);
+        assertEquals(0x00, MMU.readAddress(0x30));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+
+        CPU.pc = 0x00;
+        cycles = CPU.decZeroPage();
+        assertEquals(5, cycles);
+        assertEquals(0xFF, MMU.readAddress(0x30));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void cmpImmediateSetCarryFlagWhenAbsoluteOffsetValueIsSmallerThanA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+        MMU.writeAddress(0x01, 0x08);
+
+        int cycles = CPU.cmpImmediate();
+
+        assertEquals(2, cycles);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void cmpImmediateMustSetZeroAndCarryFlagsWhenAbsoluteOffsetValueIsEqualToA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+        MMU.writeAddress(0x01, 0x09);
+
+        int cycles = CPU.cmpImmediate();
+
+        assertEquals(2, cycles);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void cmpImmediateMustSetNegativeFlagWhenAbsoluteOffsetValueIsBiggerThanA() {
+        CPU.pc = 0x00;
+        CPU.a = 0x09;
+        MMU.writeAddress(0x01, 0x0F);
+
+        int cycles = CPU.cmpImmediate();
+
+        assertEquals(2, cycles);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+        assertEquals(0x02, CPU.pc);
+    }
+
 }

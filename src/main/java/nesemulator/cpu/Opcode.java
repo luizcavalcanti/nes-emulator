@@ -30,12 +30,14 @@ public enum Opcode {
     LDA_ABSOLUTE_X(0xBD,"LDA", AddressingMode.AbsoluteX),
     CPY_IMMEDIATE(0xC0, "CPY", AddressingMode.Immediate),
     DEX(0xCA, "DEX", AddressingMode.Implied),
+    DEC_ZERO_PAGE(0xC6, "DEC", AddressingMode.ZeroPage),
     BNE(0xD0,"BNE", AddressingMode.Relative),
     CLD(0xD8, "CLD", AddressingMode.Implied),
     CMP_ABSOLUTE_X(0xDD, "CMP", AddressingMode.AbsoluteX),
     INX(0xE8, "INX", AddressingMode.Implied),
     RTS(0x60, "RTS", AddressingMode.Implied),
-    BEQ(0xF0, "BEQ", AddressingMode.Relative);
+    BEQ(0xF0, "BEQ", AddressingMode.Relative),
+    CMP_IMMEDIATE(0xC9, "CMP", AddressingMode.Immediate);
 
 
     private static final HashMap<Integer, Opcode> enumMap = new HashMap<>();
