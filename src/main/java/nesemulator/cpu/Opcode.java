@@ -39,6 +39,7 @@ public enum Opcode {
     CLD(0xD8, "CLD", AddressingMode.Implied),
     CMP_ABSOLUTE_X(0xDD, "CMP", AddressingMode.AbsoluteX),
     INX(0xE8, "INX", AddressingMode.Implied),
+    INY(0xC8, "INY", AddressingMode.Implied),
     RTS(0x60, "RTS", AddressingMode.Implied),
     BEQ(0xF0, "BEQ", AddressingMode.Relative),
     CMP_IMMEDIATE(0xC9, "CMP", AddressingMode.Immediate);

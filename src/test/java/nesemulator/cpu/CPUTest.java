@@ -368,6 +368,20 @@ class CPUTest {
     }
 
     @Test
+    void tyaMustSetYRegisterValueToAccumulator() {
+        CPU.y = 0xAA;
+        CPU.a = 0x00;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.tya();
+
+        assertEquals(2, cycles);
+        assertEquals(0x00AA, CPU.y);
+        assertEquals(0x00AA, CPU.a);
+        assertEquals(0x01, CPU.pc);
+    }
+
+    @Test
     void staZeroPageXMustStoreRegisterAContentIntoMemoryAddressOffsetByX() {
         CPU.x = 0x03;
         CPU.a = 0xAB;
@@ -468,6 +482,48 @@ class CPUTest {
 
         assertEquals(2, cycles);
         assertEquals(0xFF, CPU.x);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void inyMustIncrementRegisterYBy1() {
+        CPU.y = 0x09;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.iny();
+
+        assertEquals(2, cycles);
+        assertEquals(0x0A, CPU.y);
+        assertEquals(0x01, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void inyMustIncrementRegisterYBy1AndSetZeroFlagIfNewYIsZero() {
+        CPU.y = 0xFF;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.iny();
+
+        assertEquals(2, cycles);
+        assertEquals(0x00, CPU.y);
+        assertEquals(0x01, CPU.pc);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void inyMustIncrementRegisterYBy1AndSetNegativeFlagIfNewYIsNegative() {
+        CPU.y = 0xFE;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.iny();
+
+        assertEquals(2, cycles);
+        assertEquals(0xFF, CPU.y);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));

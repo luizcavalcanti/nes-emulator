@@ -167,9 +167,9 @@ public class CPU {
             case STA_ZERO_PAGE_X:
                 cycleCounter += staZeroPageX();
                 break;
-//                case TYA:
-//                    cycleCounter += tya();
-//                    break;
+            case TYA:
+                cycleCounter += tya();
+                break;
             case TAY:
                 cycleCounter += tay();
                 break;
@@ -217,6 +217,9 @@ public class CPU {
                 break;
             case INX:
                 cycleCounter += inx();
+                break;
+            case INY:
+                cycleCounter += iny();
                 break;
             default:
                 logger.info(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));
@@ -342,14 +345,17 @@ public class CPU {
 //        pc += 1;
 //    }
 
-//    private static void tya() {
-//        final int cycles = 2;
-//
-//        notifyInstruction(Opcode.TYA, cycles);
-//
-//        a = y;
-//        pc += 1;
-//    }
+    static int tya() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.TYA, cycles);
+
+        a = y;
+        setNonPositiveFlags((byte) a);
+        pc += 1;
+
+        return cycles;
+    }
 
     static int ldaAbsolute() {
         final int cycles = 4;
@@ -630,7 +636,7 @@ public class CPU {
     static int tay() {
         final int cycles = 2;
 
-        notifyInstruction(Opcode.TXS, cycles);
+        notifyInstruction(Opcode.TAY, cycles);
 
         y = a;
         setNonPositiveFlags((byte) y);
@@ -646,6 +652,18 @@ public class CPU {
 
         x = (x + 1) & 0xFF;
         setNonPositiveFlags((byte) x);
+        pc += 1;
+
+        return cycles;
+    }
+
+    static int iny() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.INY, cycles);
+
+        y = (y + 1) & 0xFF;
+        setNonPositiveFlags((byte) y);
         pc += 1;
 
         return cycles;
