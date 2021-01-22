@@ -10,7 +10,7 @@ ci-test:
 clean:
 	mvn clean
 
-inspect: build
+inspect:
 	mvn javafx:run
 
 run: build

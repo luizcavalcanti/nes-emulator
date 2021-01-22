@@ -24,6 +24,7 @@ import java.io.IOException;
 public class InspectionUI extends Application implements CPUObserver {
 
     public static final int REGISTER_FONT_SIZE = 30;
+    public static final Font REGISTER_FONT = Font.font("Monospace", REGISTER_FONT_SIZE);
     private ListView<String> logList;
     private Label aLabel;
     private Label xLabel;
@@ -56,32 +57,36 @@ public class InspectionUI extends Application implements CPUObserver {
 
         // CPU Regsters
         aLabel = new Label("A: -");
-        aLabel.setFont(Font.font(REGISTER_FONT_SIZE));
+        aLabel.setFont(REGISTER_FONT);
         xLabel = new Label("X: -");
-        xLabel.setFont(Font.font(REGISTER_FONT_SIZE));
+        xLabel.setFont(REGISTER_FONT);
         yLabel = new Label("Y: -");
-        yLabel.setFont(Font.font(REGISTER_FONT_SIZE));
-        pLabel = new Label("P: -");
-        pLabel.setFont(Font.font(REGISTER_FONT_SIZE));
+        yLabel.setFont(REGISTER_FONT);
         pcLabel = new Label("PC: -");
-        pcLabel.setFont(Font.font(REGISTER_FONT_SIZE));
+        pcLabel.setFont(REGISTER_FONT);
         sLabel = new Label("S: -");
-        sLabel.setFont(Font.font(REGISTER_FONT_SIZE));
+        sLabel.setFont(REGISTER_FONT);
+        pLabel = new Label("P: -");
+        pLabel.setFont(REGISTER_FONT);
+        Label pHelpLabel = new Label("   NV1BDIZC");
+        pHelpLabel.setFont(REGISTER_FONT);
+        pHelpLabel.setPadding(new Insets(-20,0,0,0));
 
         updateRegisters();
 
         var registersPane = new VBox();
         registersPane.setPadding(new Insets(5));
         registersPane.setMinWidth(200);
-        registersPane.setSpacing(20);
+        registersPane.setSpacing(10);
         registersPane.getChildren().add(pcLabel);
-        registersPane.getChildren().add(pLabel);
         registersPane.getChildren().add(aLabel);
         registersPane.getChildren().add(xLabel);
         registersPane.getChildren().add(yLabel);
         registersPane.getChildren().add(sLabel);
+        registersPane.getChildren().add(pLabel);
+        registersPane.getChildren().add(pHelpLabel);
 
-        logList = new ListView<String>();
+        logList = new ListView<>();
         var windowPane = new BorderPane();
         windowPane.setTop(controlsPane);
         windowPane.setLeft(logList);
@@ -108,7 +113,7 @@ public class InspectionUI extends Application implements CPUObserver {
     }
 
     private void updateRegisters() {
-        aLabel.setText(String.format("A: 0x%02X", CPU.getA()));
+        aLabel.setText(String.format("A: 0x%02X", CPU.getA() & 0xFF));
         xLabel.setText(String.format("X: 0x%02X", CPU.getX()));
         yLabel.setText(String.format("Y: 0x%02X", CPU.getY()));
         sLabel.setText(String.format("S: 0x%02X", CPU.getS()));

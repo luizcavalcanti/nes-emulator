@@ -33,7 +33,9 @@ public enum Opcode {
     BNE(0xD0,"BNE", AddressingMode.Relative),
     CLD(0xD8, "CLD", AddressingMode.Implied),
     CMP_ABSOLUTE_X(0xDD, "CMP", AddressingMode.AbsoluteX),
-    INX(0xE8, "INX", AddressingMode.Implied);
+    INX(0xE8, "INX", AddressingMode.Implied),
+    RTS(0x60, "RTS", AddressingMode.Implied),
+    BEQ(0xF0, "BEQ", AddressingMode.Relative);
 
 
     private static final HashMap<Integer, Opcode> enumMap = new HashMap<>();

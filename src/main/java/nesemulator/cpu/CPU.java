@@ -95,9 +95,15 @@ public class CPU {
 
 
     public static boolean executeStep() {
-        int opcode = signedToUsignedByte(MMU.readAddress(pc));
+        int nextInstruction = signedToUsignedByte(MMU.readAddress(pc));
+        var opcode = Opcode.fromCode(nextInstruction);
 
-        switch (Opcode.fromCode(opcode)) {
+        if (opcode == null) {
+            logger.info(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));
+            return false;
+        }
+
+        switch (opcode) {
             case BRK:
                 cycleCounter += brk();
                 break;
@@ -113,9 +119,12 @@ public class CPU {
             case JSR:
                 cycleCounter += jsr();
                 break;
-//                case PHA:
-//                    cycleCounter += pha();
-//                    break;
+            case RTS:
+                cycleCounter += rts();
+                break;
+            case PHA:
+                cycleCounter += pha();
+                break;
             case JMP_ABSOLUTE:
                 cycleCounter += jmpAbsolute();
                 break;
@@ -179,6 +188,9 @@ public class CPU {
             case BNE:
                 cycleCounter += bne();
                 break;
+            case BEQ:
+                cycleCounter += beq();
+                break;
             case CLD:
                 cycleCounter += cld();
                 break;
@@ -189,8 +201,7 @@ public class CPU {
                 cycleCounter += inx();
                 break;
             default:
-                logger.info(String.format("%04X: OpCode $%02X not implemented", pc, opcode));
-                return false;
+                break;
         }
         return true;
     }
@@ -208,7 +219,7 @@ public class CPU {
     }
 
     static int bmi() {
-        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        // TODO: Cycles: +2 if to a new page
         var cycles = 2;
         var offset = 2;
         final int value = MMU.readAddress(pc + 1);
@@ -225,7 +236,7 @@ public class CPU {
     }
 
     static int bcc() {
-        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        // TODO: Cycles: +2 if to a new page
         var cycles = 2;
         var offset = 2;
         final int value = MMU.readAddress(pc + 1);
@@ -242,7 +253,7 @@ public class CPU {
     }
 
     static int bpl() {
-        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        // TODO: Cycles: +2 if to a new page
         var cycles = 2;
         var offset = 2;
         final int value = MMU.readAddress(pc + 1);
@@ -275,8 +286,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDX_IMMEDIATE, cycles, value);
 
-        CPU.x = value;
-        setNonPositiveFlags(x);
+        CPU.x = value & 0xff;
+        setNonPositiveFlags((byte) x);
         pc += 2;
 
         return cycles;
@@ -292,15 +303,16 @@ public class CPU {
         return cycles;
     }
 
-//    private static void pha() {
-//        final int cycles = 3;
-//
-//        notifyInstruction(Opcode.PHA, cycles);
-//
-//        MMU.writeAddress(s, a);
-//        s--;
-//        pc += 1;
-//    }
+    static int pha() {
+        final int cycles = 3;
+
+        notifyInstruction(Opcode.PHA, cycles);
+
+        pushToStack(a);
+        pc += 1;
+
+        return cycles;
+    }
 
 //    private static void txa() {
 //        final int cycles = 2;
@@ -326,8 +338,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDA_ABSOLUTE, cycles, address);
 
-        a = MMU.readAddress(address);
-        setNonPositiveFlags(a);
+        a = MMU.readAddress(address) & 0xff;
+        setNonPositiveFlags((byte) a);
         pc += 3;
 
         return cycles;
@@ -339,8 +351,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, address);
 
-        a = MMU.readAddress(address + x);
-        setNonPositiveFlags(a);
+        a = MMU.readAddress(address + x) & 0xff;
+        setNonPositiveFlags((byte) a);
         pc += 3;
 
         return cycles;
@@ -352,8 +364,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDA_IMMEDIATE, cycles, value);
 
-        a = value;
-        setNonPositiveFlags(a);
+        a = value & 0xff;
+        setNonPositiveFlags((byte) a);
         pc += 2;
 
         return cycles;
@@ -365,8 +377,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDA_ZERO_PAGE, cycles, address);
 
-        a = MMU.readAddress(address);
-        setNonPositiveFlags(a);
+        a = MMU.readAddress(address) & 0xff;
+        setNonPositiveFlags((byte) a);
         pc += 2;
 
         return cycles;
@@ -378,8 +390,8 @@ public class CPU {
 
         notifyInstruction(Opcode.LDY_IMMEDIATE, cycles, value);
 
-        y = value;
-        setNonPositiveFlags(y);
+        y = value & 0xff;
+        setNonPositiveFlags((byte) y);
         pc += 2;
 
         return cycles;
@@ -458,6 +470,16 @@ public class CPU {
         return cycles;
     }
 
+    static int rts() {
+        final int cycles = 6;
+
+        notifyInstruction(Opcode.RTS, cycles);
+
+        pc = pull2BytesFromStack();
+
+        return cycles;
+    }
+
 //    private static void dey() {
 //        final int cycles = 2;
 //
@@ -471,16 +493,35 @@ public class CPU {
 //    }
 
     static int bne() {
-        // TODO: Cycles: 2 (+1 if branch succeeds, +2 if to a new page)
+        // TODO: cycles +2 if to a new page
         var cycles = 2;
         var offset = 2;
         final int value = MMU.readAddress(pc + 1);
+
         if (!isStatusFlagSet(STATUS_FLAG_ZERO)) {
             cycles += 1;
             offset += value;
         }
 
         notifyInstruction(Opcode.BNE, cycles, value);
+
+        pc += offset;
+
+        return cycles;
+    }
+
+    static int beq() {
+        // TODO: cycles +2 if to a new page
+        var cycles = 2;
+        var offset = 2;
+
+        final int value = MMU.readAddress(pc + 1);
+        if (isStatusFlagSet(STATUS_FLAG_ZERO)) {
+            cycles += 1;
+            offset += value;
+        }
+
+        notifyInstruction(Opcode.BEQ, cycles, value);
 
         pc += offset;
 
@@ -514,8 +555,8 @@ public class CPU {
 
         notifyInstruction(Opcode.INX, cycles);
 
-        x++;
-        setNonPositiveFlags(x);
+        x = (x + 1) & 0xFF;
+        setNonPositiveFlags((byte) x);
         pc += 1;
 
         return cycles;
@@ -526,8 +567,8 @@ public class CPU {
 
         notifyInstruction(Opcode.DEX, cycles);
 
-        x--;
-        setNonPositiveFlags(x);
+        x = (x - 1) & 0xFF;
+        setNonPositiveFlags((byte) x);
         pc += 1;
 
         return cycles;
@@ -603,7 +644,7 @@ public class CPU {
         notifyInstruction(Opcode.ORA_IMMEDIATE, cycles, value);
 
         a |= value;
-        setNonPositiveFlags(a);
+        setNonPositiveFlags((byte) a);
         pc += 2;
 
         return cycles;
@@ -619,7 +660,7 @@ public class CPU {
         return (i2 << 8) | i1;
     }
 
-    private static void setNonPositiveFlags(int value) {
+    private static void setNonPositiveFlags(byte value) {
         if (value == 0) {
             setStatusFlag(STATUS_FLAG_ZERO);
         } else {
@@ -633,12 +674,12 @@ public class CPU {
         }
     }
 
-    private static void pushToStack(int value) {
+    static void pushToStack(int value) {
         MMU.writeAddress(0x0100 + s, value);
         s--;
     }
 
-    private static void push2BytesToStack(int value) {
+    static void push2BytesToStack(int value) {
         int high = ((value >> 8) & 0xFF);
         int low = (value & 0xFF);
 
@@ -646,8 +687,14 @@ public class CPU {
         pushToStack(low);
     }
 
-    private static int popFromStack() {
+    static int pullFromStack() {
         s++;
         return MMU.readAddress(0x0100 + s);
+    }
+
+    static int pull2BytesFromStack() {
+        int low = pullFromStack();
+        int high = pullFromStack();
+        return ((high << 8) & 0xFF00) | (low & 0xFF);
     }
 }

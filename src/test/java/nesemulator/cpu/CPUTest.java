@@ -57,7 +57,7 @@ class CPUTest {
 
     @Test
     void ldaImmediateMustLoadUnsignedValueToRegisterA() {
-        var value = 0xFD;
+        var value = 0x0D;
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -73,7 +73,7 @@ class CPUTest {
 
     @Test
     void ldaImmediateMustSetNegativeFlagIfAIsNegative() {
-        var value = -1;
+        var value = 0xFF;
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -121,7 +121,7 @@ class CPUTest {
 
     @Test
     void ldaAbsoluteMustLoadUnsignedValueFromMemoryPositionToRegisterA() {
-        var value = 0xFD;
+        var value = 0x0D;
         CPU.a = 0x00;
         CPU.pc = 0x00;
 
@@ -159,7 +159,7 @@ class CPUTest {
 
     @Test
     void ldaAbsoluteMustSetNegativeFlagIfValueLoadedToRegisterAIsNegative() {
-        var value = -60;
+        var value = 0xC4;
         CPU.a = 0x00;
         CPU.pc = 0x00;
 
@@ -263,7 +263,7 @@ class CPUTest {
 
     @Test
     void ldxImmediateMustLoadUnsignedValueToRegisterX() {
-        var value = 0xFD;
+        var value = 0x0D;
         CPU.x = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -278,7 +278,7 @@ class CPUTest {
 
     @Test
     void ldxImmediateMustSetNegativeFlagIfXIsNegative() {
-        var value = -1;
+        var value = 0xFF;
         CPU.x = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -384,7 +384,7 @@ class CPUTest {
 
     @Test
     void inxMustIncrementRegisterXBy1AndSetZeroFlagIfNewXIsZero() {
-        CPU.x = -1;
+        CPU.x = 0xFF;
         CPU.pc = 0x00;
 
         int cycles = CPU.inx();
@@ -398,13 +398,13 @@ class CPUTest {
 
     @Test
     void inxMustIncrementRegisterXBy1AndSetNegativeFlagIfNewXIsNegative() {
-        CPU.x = -2;
+        CPU.x = 0xFE;
         CPU.pc = 0x00;
 
         int cycles = CPU.inx();
 
         assertEquals(2, cycles);
-        assertEquals(-1, CPU.x);
+        assertEquals(0xFF, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -439,7 +439,7 @@ class CPUTest {
 
     @Test
     void ldaAbsoluteXMustLoadUnsignedValueFromMemoryPositionOffsetByXToRegisterA() {
-        var value = 0xFD;
+        var value = 0x0D;
         CPU.a = 0x00;
         CPU.x = 0x03;
         CPU.pc = 0x00;
@@ -479,7 +479,7 @@ class CPUTest {
 
     @Test
     void ldaAbsoluteXMustSetNegativeFlagIfValueLoadedToRegisterAIsNegative() {
-        var value = -60;
+        var value = 0xC4;
         CPU.a = 0x00;
         CPU.x = 0x03;
         CPU.pc = 0x00;
@@ -644,7 +644,7 @@ class CPUTest {
         int cycles = CPU.dex();
 
         assertEquals(2, cycles);
-        assertEquals(-1, CPU.x);
+        assertEquals(0xFF, CPU.x);
         assertEquals(0x01, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
@@ -733,7 +733,7 @@ class CPUTest {
     @Test
     void ldaZeroPageMustLoadUnsignedValueInGivenAddressIntoRegisterA() {
         var address = 0xFD;
-        var value = 0xAA;
+        var value = 0x6E;
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, address);
@@ -751,7 +751,7 @@ class CPUTest {
     @Test
     void ldaZeroPageMustSetNegativeFlagIsAIsNegative() {
         var address = 0xFD;
-        var value = -1;
+        var value = 0xFF;
         CPU.a = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, address);
@@ -798,7 +798,7 @@ class CPUTest {
 
     @Test
     void ldyImmediateMustLoadSpecifiedValueToRegisterY() {
-        var value = 0xFD;
+        var value = 0x0B;
         CPU.y = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -813,7 +813,7 @@ class CPUTest {
 
     @Test
     void ldyImmediateMustSetNegativeFlagIfYIsNegative() {
-        var value = -1;
+        var value = 0xFF;
         CPU.y = 0x00;
         CPU.pc = 0x00;
         MMU.writeAddress(0x01, value);
@@ -839,5 +839,54 @@ class CPUTest {
         assertEquals(0x02, CPU.pc);
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+    }
+
+    @Test
+    void rtsMustPullProgramCounterFromStackAndSetIt() {
+        CPU.pc = 0x0000;
+        CPU.push2BytesToStack(0xABCD);
+
+        int cycles = CPU.rts();
+
+        assertEquals(6, cycles);
+        assertEquals(0xABCD, CPU.pc);
+    }
+
+    @Test
+    void phaMustPushAToStack() {
+        CPU.pc = 0x00;
+        CPU.a = 0xAB;
+
+        int cycles = CPU.pha();
+
+        assertEquals(3, cycles);
+        assertEquals(0xAB, CPU.pullFromStack());
+    }
+
+    @Test
+    void beqMustMoveProgramCountByGivenOffsetIfZeroFlagIsSet() {
+        CPU.pc = 0x00;
+        CPU.setStatusFlag(CPU.STATUS_FLAG_ZERO);
+
+
+        MMU.writeAddress(0x01, 0x30);
+
+        int cycles = CPU.beq();
+
+        assertEquals(3, cycles);
+        assertEquals(0x32, CPU.pc);
+    }
+
+    @Test
+    void beqMustMoveProgramCountBy2IfZeroFlagIsUnset() {
+        CPU.pc = 0x00;
+        CPU.unsetStatusFlag(CPU.STATUS_FLAG_ZERO);
+
+        MMU.writeAddress(0x01, 0x30);
+
+        int cycles = CPU.beq();
+
+        assertEquals(2, cycles);
+        assertEquals(0x02, CPU.pc);
     }
 }
