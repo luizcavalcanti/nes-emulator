@@ -143,6 +143,9 @@ public class CPU {
             case DEY:
                 cycleCounter += dey();
                 break;
+            case INC_ABSOLUTE:
+                cycleCounter += incAbsolute();
+                break;
             case DEC_ZERO_PAGE:
                 cycleCounter += decZeroPage();
                 break;
@@ -571,6 +574,22 @@ public class CPU {
         setNonPositiveFlags((byte) newValue);
 
         pc += 2;
+
+        return cycles;
+    }
+
+    static int incAbsolute() {
+        final int cycles = 6;
+
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        notifyInstruction(Opcode.INC_ABSOLUTE, cycles, address);
+
+        int value = MMU.readAddress(address);
+        int newValue = (value + 1) & 0xFF;
+        MMU.writeAddress(address, newValue);
+        setNonPositiveFlags((byte) newValue);
+
+        pc += 3;
 
         return cycles;
     }

@@ -13,7 +13,7 @@ in java 11 (because reasons).
 - A functional CPU with some opcodes (implementing them as needed)
 - Basic inspection GUI for debugging purposes (run `make inspect`)
 
-Supported CPU Opcodes so far: 37 of 151
+Supported CPU Opcodes so far: 40 of 151
 
 ### What I'm working on right now?
 

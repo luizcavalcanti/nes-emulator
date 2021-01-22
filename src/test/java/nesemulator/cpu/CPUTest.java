@@ -1080,6 +1080,37 @@ class CPUTest {
     }
 
     @Test
+    void incAbsoluteMustIncrementMemoryAddressValueBy1AndSetFlagsAccordingly() {
+        CPU.pc = 0x00;
+        MMU.writeAddress(0x01, 0x30);
+        MMU.writeAddress(0x02, 0x00);
+        MMU.writeAddress(0x30, 0xFE);
+
+        int cycles = CPU.incAbsolute();
+        assertEquals(0x03, CPU.pc);
+        assertEquals(6, cycles);
+        assertEquals(0xFF, MMU.readAddress(0x30));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+
+        CPU.pc = 0x00;
+        cycles = CPU.incAbsolute();
+        assertEquals(6, cycles);
+        assertEquals(0x03, CPU.pc);
+        assertEquals(0x00, MMU.readAddress(0x30));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+
+        CPU.pc = 0x00;
+        cycles = CPU.incAbsolute();
+        assertEquals(6, cycles);
+        assertEquals(0x03, CPU.pc);
+        assertEquals(0x01, MMU.readAddress(0x30));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
     void cmpImmediateSetCarryFlagWhenAbsoluteOffsetValueIsSmallerThanA() {
         CPU.pc = 0x00;
         CPU.a = 0x09;

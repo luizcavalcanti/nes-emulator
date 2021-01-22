@@ -42,7 +42,8 @@ public enum Opcode {
     INY(0xC8, "INY", AddressingMode.Implied),
     RTS(0x60, "RTS", AddressingMode.Implied),
     BEQ(0xF0, "BEQ", AddressingMode.Relative),
-    CMP_IMMEDIATE(0xC9, "CMP", AddressingMode.Immediate);
+    CMP_IMMEDIATE(0xC9, "CMP", AddressingMode.Immediate),
+    INC_ABSOLUTE(0xEE, "INC", AddressingMode.Absolute);
 
 
     private static final HashMap<Integer, Opcode> enumMap = new HashMap<>();
