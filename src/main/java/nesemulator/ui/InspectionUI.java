@@ -25,13 +25,14 @@ public class InspectionUI extends Application implements CPUObserver {
 
     public static final int REGISTER_FONT_SIZE = 30;
     public static final Font REGISTER_FONT = Font.font("Monospace", REGISTER_FONT_SIZE);
-    private ListView<String> logList;
+    private ListView<String> logListView;
     private Label aLabel;
     private Label xLabel;
     private Label yLabel;
     private Label pLabel;
     private Label pcLabel;
     private Label sLabel;
+    private ListView<String> stackListView;
 
     public static void main(String[] args) {
         launch();
@@ -43,6 +44,7 @@ public class InspectionUI extends Application implements CPUObserver {
         stage.setScene(buildScene());
         stage.show();
         runStuff();
+        updateRegisters();
     }
 
     private Scene buildScene() {
@@ -56,23 +58,21 @@ public class InspectionUI extends Application implements CPUObserver {
         controlsPane.getChildren().add(nextInstructionButton);
 
         // CPU Regsters
-        aLabel = new Label("A: -");
+        aLabel = new Label("A:  -");
         aLabel.setFont(REGISTER_FONT);
-        xLabel = new Label("X: -");
+        xLabel = new Label("X:  -");
         xLabel.setFont(REGISTER_FONT);
-        yLabel = new Label("Y: -");
+        yLabel = new Label("Y:  -");
         yLabel.setFont(REGISTER_FONT);
         pcLabel = new Label("PC: -");
         pcLabel.setFont(REGISTER_FONT);
-        sLabel = new Label("S: -");
+        sLabel = new Label("S:  -");
         sLabel.setFont(REGISTER_FONT);
-        pLabel = new Label("P: -");
+        pLabel = new Label("P:  -");
         pLabel.setFont(REGISTER_FONT);
-        Label pHelpLabel = new Label("   NV1BDIZC");
+        Label pHelpLabel = new Label("    NV1BDIZC");
         pHelpLabel.setFont(REGISTER_FONT);
         pHelpLabel.setPadding(new Insets(-20,0,0,0));
-
-        updateRegisters();
 
         var registersPane = new VBox();
         registersPane.setPadding(new Insets(5));
@@ -86,11 +86,14 @@ public class InspectionUI extends Application implements CPUObserver {
         registersPane.getChildren().add(pLabel);
         registersPane.getChildren().add(pHelpLabel);
 
-        logList = new ListView<>();
+        stackListView = new ListView<>();
+
+        logListView = new ListView<>();
         var windowPane = new BorderPane();
         windowPane.setTop(controlsPane);
-        windowPane.setLeft(logList);
+        windowPane.setLeft(logListView);
         windowPane.setCenter(registersPane);
+        windowPane.setRight(stackListView);
         windowPane.setPadding(new Insets(10, 0, 0, 0));
         return new Scene(windowPane, 800, 600); //, 300, 275
     }
@@ -110,22 +113,31 @@ public class InspectionUI extends Application implements CPUObserver {
     private void handleNextInstructionAction(ActionEvent event) {
         CPU.executeStep();
         updateRegisters();
+        updateStack();
     }
 
     private void updateRegisters() {
-        aLabel.setText(String.format("A: 0x%02X", CPU.getA() & 0xFF));
-        xLabel.setText(String.format("X: 0x%02X", CPU.getX()));
-        yLabel.setText(String.format("Y: 0x%02X", CPU.getY()));
-        sLabel.setText(String.format("S: 0x%02X", CPU.getS()));
-        pLabel.setText(String.format("P: %08d", Integer.parseInt(Integer.toBinaryString(CPU.getP()))));
+        aLabel.setText(String.format("A:  0x%02X", CPU.getA() & 0xFF));
+        xLabel.setText(String.format("X:  0x%02X", CPU.getX()));
+        yLabel.setText(String.format("Y:  0x%02X", CPU.getY()));
+        sLabel.setText(String.format("S:  0x%02X", CPU.getS()));
+        pLabel.setText(String.format("P:  %08d", Integer.parseInt(Integer.toBinaryString(CPU.getP()))));
         pcLabel.setText(String.format("PC: 0x%04X", CPU.getPC()));
+    }
+
+    private void updateStack() {
+        var memoryAddress = 0x0100 + CPU.getS();
+        stackListView.getItems().clear();
+        for (int i = memoryAddress; i<0x0200; i++) {
+            stackListView.getItems().add(String.format("0x%02X", MMU.readAddress(i)));
+        }
     }
 
     @Override
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {
         var formattedOperands = getFormattedOperands(opcode, operands);
         var labelText = String.format("%04X: %s%s", programCount, opcode.getName(), formattedOperands);
-        logList.getItems().add(labelText);
+        logListView.getItems().add(labelText);
     }
 
     private String getFormattedOperands(Opcode opcode, int[] operands) {
