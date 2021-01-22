@@ -23,6 +23,7 @@ public enum Opcode {
     STA_INDIRECT_Y(0x91, "STA", AddressingMode.IndirectY),
     STA_ZERO_PAGE_X(0x95, "STA", AddressingMode.ZeroPageX),
     TYA(0x98, "TYA", AddressingMode.Implied),
+    STA_ABSOLUTE_Y(0x99, "STA", AddressingMode.AbsoluteY),
     TXS(0x9A, "TXS", AddressingMode.Implied),
     TAY(0xA8, "TAY", AddressingMode.Implied),
     LDY_IMMEDIATE(0xA0, "LDY", AddressingMode.Immediate),

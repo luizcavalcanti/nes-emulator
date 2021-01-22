@@ -158,9 +158,12 @@ public class CPU {
             case BCC:
                 cycleCounter += bcc();
                 break;
-//                case STA_INDIRECT_Y:
-//                    cycleCounter += staIndirectY();
-//                    break;
+            case STA_INDIRECT_Y:
+                cycleCounter += staIndirectY();
+                break;
+            case STA_ABSOLUTE_Y:
+                cycleCounter += staAbsoluteY();
+                break;
             case STA_ZERO_PAGE_X:
                 cycleCounter += staZeroPageX();
                 break;
@@ -428,26 +431,41 @@ public class CPU {
 
     static int staAbsolute() {
         final int cycles = 4;
-        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
 
-        notifyInstruction(Opcode.STA_ABSOLUTE, cycles, value);
+        notifyInstruction(Opcode.STA_ABSOLUTE, cycles, address);
 
-        MMU.writeAddress(value, a);
+        MMU.writeAddress(address, a);
         pc += 3;
 
         return cycles;
     }
 
-//    private static void staIndirectY() {
-//        //TODO: add 1 cycle if page boundary is crossed
-//        int cycles = 5;
-//        int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
-//
-//        notifyInstruction(Opcode.STA_INDIRECT_Y, cycles, addressLSB);
-//
-//        MMU.writeAddress(addressLSB + y, a);
-//        pc += 2;
-//    }
+    static int staAbsoluteY() {
+        final int cycles = 5;
+        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+
+        notifyInstruction(Opcode.STA_ABSOLUTE_Y, cycles, address);
+
+        MMU.writeAddress(address + y, a);
+        pc += 3;
+
+        return cycles;
+    }
+
+    static int staIndirectY() {
+        //TODO: add 1 cycle if page boundary is crossed
+        int cycles = 6;
+        int addressLSB = signedToUsignedByte(MMU.readAddress(pc + 1));
+        int address = littleEndianToInt(MMU.readAddress(addressLSB), MMU.readAddress(addressLSB + 1));
+
+        notifyInstruction(Opcode.STA_INDIRECT_Y, cycles, addressLSB);
+
+        MMU.writeAddress(address + y, a);
+        pc += 2;
+
+        return cycles;
+    }
 
     static int styZeroPage() {
         final int cycles = 3;

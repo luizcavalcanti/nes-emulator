@@ -1,5 +1,6 @@
 package nesemulator;
 
+import nesemulator.cpu.AddressingMode;
 import nesemulator.cpu.CPUObserver;
 import nesemulator.cpu.Opcode;
 import org.slf4j.Logger;
@@ -11,8 +12,13 @@ public class LogCPUObserver implements CPUObserver {
 
     @Override
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {
+        String formattedOperands = getFormattedOperands(opcode.getAddressingMode(), operands);
+        logger.info(String.format("%04X: %s%s (%d cycles)", programCount, opcode.getName(), formattedOperands, cycles));
+    }
+
+    private String getFormattedOperands(AddressingMode addressingMode, int[] operands) {
         String formattedOperands = "";
-        switch (opcode.getAddressingMode()) {
+        switch (addressingMode) {
             case Implied:
                 break;
             case Relative:
@@ -31,12 +37,15 @@ public class LogCPUObserver implements CPUObserver {
             case AbsoluteX:
                 formattedOperands = String.format(" $%04X, X", operands[0]);
                 break;
+            case AbsoluteY:
+                formattedOperands = String.format(" $%04X, Y", operands[0]);
+                break;
             case IndirectY:
                 formattedOperands = String.format(" ($%04X), Y", operands[0]);
                 break;
             default:
-                throw new UnsupportedOperationException("Please write a log handler for this type of addressing mode: " + opcode.getAddressingMode().name());
+                throw new UnsupportedOperationException("Please write a log handler for this addressing mode: " + addressingMode.name());
         }
-        logger.info(String.format("%04X: %s%s (%d cycles)", programCount, opcode.getName(), formattedOperands, cycles));
+        return formattedOperands;
     }
 }

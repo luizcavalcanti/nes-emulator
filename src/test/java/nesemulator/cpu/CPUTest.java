@@ -120,6 +120,23 @@ class CPUTest {
     }
 
     @Test
+    void staAbsoluteYMustStoreTheAccumulatorContentIntoMemoryOffsetByY() {
+        CPU.a = 0x99;
+        CPU.y = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABCD, 0x00);
+
+        int cycles = CPU.staAbsoluteY();
+
+        assertEquals(5, cycles);
+        assertEquals(0x99, MMU.readAddress(0xABD0));
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
     void styAbsoluteMustStoreTheAccumulatorContentIntoMemory() {
         CPU.y = 0x99;
         CPU.pc = 0x00;
@@ -1049,6 +1066,24 @@ class CPUTest {
         assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
         assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
         assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
+    void staIndirectYMustStoreAccumulatorIntoGivenIndirectAddressOffsetByY() {
+        CPU.pc = 0x00;
+        CPU.a = 0xAB;
+        CPU.y = 0x03;
+        MMU.writeAddress(0x01, 0x12);
+        MMU.writeAddress(0x12, 0xAA);
+        MMU.writeAddress(0x13, 0xDE);
+
+        MMU.writeAddress(0xDEAD, 0x00);
+
+        int cycles = CPU.staIndirectY();
+
+        assertEquals(6, cycles);
+        assertEquals(0x02, CPU.pc);
+        assertEquals(0xAB, MMU.readAddress(0xDEAD));
     }
 
 }
