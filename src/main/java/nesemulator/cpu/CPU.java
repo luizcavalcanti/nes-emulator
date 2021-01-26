@@ -30,7 +30,7 @@ public class CPU {
     static int a;
     static int x;
     static int y;
-    static int p;
+    static byte p;
     static int pc;
     static int s;
 

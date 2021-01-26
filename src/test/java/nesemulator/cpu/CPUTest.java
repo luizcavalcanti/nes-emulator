@@ -18,7 +18,7 @@ class CPUTest {
         assertEquals(0x00, CPU.a);
         assertEquals(0x00, CPU.x);
         assertEquals(0x00, CPU.y);
-        assertEquals(0x00, CPU.p);
+        assertEquals((byte) 0x34, CPU.p);
     }
 
     @Test
