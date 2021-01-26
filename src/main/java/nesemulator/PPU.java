@@ -5,6 +5,7 @@ public class PPU {
     static byte control;
     static byte oamAddress;
     static byte mask;
+    static byte status;
 
     private static final int CONTROL_BIT_NMI_ENABLE = 7;
     private static final int CONTROL_BIT_PPU_MASTER_SLAVE = 6;
@@ -16,9 +17,10 @@ public class PPU {
     private static final int CONTROL_BIT_NAME_TABLE_ADDRESS_2 = 0;
 
     public static void initialize() {
-        control = 0x00;
-        oamAddress = 0x00;
-        mask = 0x00;
+        control = (byte) 0b00000000;
+        oamAddress = (byte) 0b00000000;
+        mask = (byte) 0b00000000;
+        status = (byte) 0b10000000;
     }
 
     public static void write(int address, byte data) {
@@ -37,20 +39,22 @@ public class PPU {
         }
     }
 
-    static boolean isBitSet(byte value, int bitIndex) {
-        return (value & (1 << (bitIndex))) > 0;
-    }
-
     public static byte read(final int address) {
         switch (address) {
             case 0x2000:
                 return control;
             case 0x2001:
                 return mask;
+            case 0x2002:
+                return status;// TODO: status manipulation by reading this address
             case 0x2003:
                 return oamAddress;
             default:
                 throw new UnsupportedOperationException(String.format("You cannot read address $%04X on PPU", address));
         }
+    }
+
+    static boolean isBitSet(byte value, int bitIndex) {
+        return (value & (1 << (bitIndex))) > 0;
     }
 }

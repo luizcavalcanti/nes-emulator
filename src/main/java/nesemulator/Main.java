@@ -18,12 +18,16 @@ public class Main {
         try {
             String romFileName = "balloon.nes";
 
+            logger.info("Initializing Hardware...");
+            PPU.initialize();
+            MMU.initialize();
+            CPU.initialize();
+            CPU.addObserver(new LogCPUObserver());
+
             logger.info("Loading {}...", romFileName);
             Cart cart = Cart.fromROMFile(romFileName);
             MMU.loadCart(cart);
-            logger.info("Initializing CPU...");
-            CPU.initialize();
-            CPU.addObserver(new LogCPUObserver());
+
             logger.info("Executing...");
             CPU.execute();
         } catch (IOException e) {

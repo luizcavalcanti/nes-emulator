@@ -39,12 +39,7 @@ public class MMU {
         }
 
         if (isPPUAddress(address)) {
-            address = getMirroredPPUAddress(address);
-            if (address == 0x2002) {// TODO: Move feature to PPU
-                return (byte) 0b10000000;
-            } else {
-                return PPU.read(address);
-            }
+            return PPU.read(getMirroredPPUAddress(address));
         }
 
         return memory[address];

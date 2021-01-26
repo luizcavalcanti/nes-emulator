@@ -17,6 +17,7 @@ class PPUTest {
         assertEquals(0x00, PPU.control);
         assertEquals(0x00, PPU.oamAddress);
         assertEquals(0x00, PPU.mask);
+        assertEquals((byte) 0b10000000, PPU.status);
     }
 
     @Test
@@ -56,6 +57,13 @@ class PPUTest {
         PPU.mask = (byte) 0xBB;
 
         assertEquals((byte) 0xBB, PPU.read(0x2001));
+    }
+
+    @Test
+    void readShouldReturnTheStatusByteIfRequiredAddressIs0x2002() {
+        PPU.status = (byte) 0xCC;
+
+        assertEquals((byte) 0xCC, PPU.read(0x2002));
     }
 
     @Test
