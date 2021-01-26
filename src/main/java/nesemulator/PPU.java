@@ -1,0 +1,56 @@
+package nesemulator;
+
+public class PPU {
+
+    static byte control;
+    static byte oamAddress;
+    static byte mask;
+
+    private static final int CONTROL_BIT_NMI_ENABLE = 7;
+    private static final int CONTROL_BIT_PPU_MASTER_SLAVE = 6;
+    private static final int CONTROL_BIT_SPRITE_HEIGHT = 5;
+    private static final int CONTROL_BIT_BACKGROUND_TILE_SELECT = 4;
+    private static final int CONTROL_BIT_SPRITE_TILE_SELECT = 3;
+    private static final int CONTROL_BIT_INCREMENT_MODE = 2;
+    private static final int CONTROL_BIT_NAME_TABLE_ADDRESS_1 = 1;
+    private static final int CONTROL_BIT_NAME_TABLE_ADDRESS_2 = 0;
+
+    public static void initialize() {
+        control = 0x00;
+        oamAddress = 0x00;
+        mask = 0x00;
+    }
+
+    public static void write(int address, byte data) {
+        switch (address) {
+            case 0x2000:
+                control = data;
+                break;
+            case 0x2001:
+                mask = data;
+                break;
+            case 0x2003:
+                oamAddress = data;
+                break;
+            default:
+                throw new UnsupportedOperationException(String.format("You cannot write address $%04X on PPU", address));
+        }
+    }
+
+    static boolean isBitSet(byte value, int bitIndex) {
+        return (value & (1 << (bitIndex))) > 0;
+    }
+
+    public static byte read(final int address) {
+        switch (address) {
+            case 0x2000:
+                return control;
+            case 0x2001:
+                return mask;
+            case 0x2003:
+                return oamAddress;
+            default:
+                throw new UnsupportedOperationException(String.format("You cannot read address $%04X on PPU", address));
+        }
+    }
+}

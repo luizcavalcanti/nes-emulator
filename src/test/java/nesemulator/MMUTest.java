@@ -1,15 +1,20 @@
 package nesemulator;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MMUTest {
 
+    @BeforeEach
+    void setUp() {
+        MMU.initialize();
+    }
+
     @Test
     void readAddressFromMirroredCPURAMMustPointToActualRAM() {
         int value = 0xAB;
-        MMU.initialize();
         MMU.writeAddress(0x0173, value);
 
         assertEquals(value, MMU.readAddress(0x0973));
@@ -20,7 +25,6 @@ class MMUTest {
     @Test
     void readAddressFromMirroredPPUPortsMustPointToActualPPUPorts() {
         int value = 0x1A;
-        MMU.initialize();
 
         // TODO change when we stop mocking PPU response
         MMU.writeAddress(0x2003, value);
@@ -40,7 +44,6 @@ class MMUTest {
 
     @Test
     void loadCartShouldMirrorPRGROMIfBoardModelIsZero() {
-        MMU.initialize();
         Cart cart = new Cart();
         cart.prgROM = new byte[10];
         for (int i = 0; i < 10; i++) {
@@ -75,4 +78,10 @@ class MMUTest {
         assertEquals(0x09, MMU.readAddress(0xC009));
     }
 
+    @Test
+    void writeAddressShouldWriteToPPUIfAddressIsBetween0x2000And0x3FFF() {
+        PPU.initialize();
+        MMU.writeAddress(0x2000, 0xAB);
+        assertEquals((byte) 0xAB, PPU.control);
+    }
 }

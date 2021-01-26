@@ -10,7 +10,7 @@ public class MMU {
     private static final int WHOLE_MEMORY_SIZE = 0x10001;
     private static final int CPU_RAM_UPPER_LIMIT = 0x1FFF;
     private static final int PPU_PORTS_INITIAL_ADDRESS = 0x2000;
-    private static final int PPU_PORTS_UPPER_LIMIT = 0x3FFF;
+    private static final int PPU_PORTS_UPPER_ADDRESS = 0x3FFF;
     private static final int PPU_PORTS_COUNT = 0x08;
 
     static int[] memory = new int[WHOLE_MEMORY_SIZE];
@@ -38,12 +38,12 @@ public class MMU {
             return memory[address % 2048];
         }
 
-        if (address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_LIMIT) {
-            address = PPU_PORTS_INITIAL_ADDRESS + (address % PPU_PORTS_COUNT);
+        if (isPPUAddress(address)) {
+            address = getMirroredPPUAddress(address);
             if (address == 0x2002) {// TODO: Move feature to PPU
                 return (byte) 0b10000000;
             } else {
-                return memory[address];
+                return PPU.read(address);
             }
         }
 
@@ -51,14 +51,21 @@ public class MMU {
     }
 
     public static void writeAddress(int address, int value) {
-        if (address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_LIMIT) {
-            //TODO call PPU
+        if (isPPUAddress(address)) {
+            PPU.write(getMirroredPPUAddress(address), (byte) value);
+        } else {
+            if (address <= CPU_RAM_UPPER_LIMIT) { //CPU RAM Mirroring
+                address = address % 2048;
+            }
+            memory[address] = value;
         }
+    }
 
-        if (address <= CPU_RAM_UPPER_LIMIT) { //CPU RAM Mirroring
-            address = address % 2048;
-        }
+    private static int getMirroredPPUAddress(int address) {
+        return PPU_PORTS_INITIAL_ADDRESS + (address % PPU_PORTS_COUNT);
+    }
 
-        memory[address] = value;
+    private static boolean isPPUAddress(int address) {
+        return address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_ADDRESS;
     }
 }
