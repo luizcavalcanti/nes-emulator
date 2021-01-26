@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 public class CPU {
 
+    public static final int IRQ_ADDRESS_1 = 0xFFFE;
+    public static final int IRQ_ADDRESS_2 = 0xFFFF;
     static ArrayList<CPUObserver> observers = new ArrayList<>();
 
     static final int STATUS_FLAG_CARRY = 0;
@@ -15,12 +17,12 @@ public class CPU {
     static final int STATUS_FLAG_INTERRUPT = 2;
     static final int STATUS_FLAG_DECIMAL = 3;
     static final int STATUS_FLAG_BREAK = 4;
-    static final int STATUS_FLAG_ALWAYS_ONE = 5;
+    // Bit 5 is not used, always 1
     static final int STATUS_FLAG_OVERFLOW = 6;
     static final int STATUS_FLAG_NEGATIVE = 7;
 
     private static final int INITIAL_PC = 0x8000;
-    private static final int PROCESSOR_STATUS_IRQ_DISABLED = 0x34;
+    private static final int INITIAL_PROCESSOR_STATUS = 0x34;
     private static final int INITIAL_STACK_POINTER = 0xFF;
 
     private static final Logger logger = LoggerFactory.getLogger(CPU.class);
@@ -78,7 +80,8 @@ public class CPU {
     public static void initialize() {
         s = INITIAL_STACK_POINTER; // Stack pointer staring into the abyss
         pc = INITIAL_PC;
-        a = x = y = p = 0x00; // Registers cleanup
+        a = x = y = 0x00; // Registers cleanup
+        p = INITIAL_PROCESSOR_STATUS;
         cycleCounter = 0;
     }
 
@@ -765,10 +768,7 @@ public class CPU {
         push2BytesToStack(pc);
         pushToStack(p);
 
-        // TODO: understand what should happen here and name those constants
-        int newPCAddress = littleEndianToInt(MMU.readAddress(0xFFFE), MMU.readAddress(0xFFFF));
-
-        pc = newPCAddress;
+        pc = littleEndianToInt(MMU.readAddress(IRQ_ADDRESS_1), MMU.readAddress(IRQ_ADDRESS_2));
 
         return cycles;
     }

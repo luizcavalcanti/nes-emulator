@@ -15,7 +15,7 @@ public class Cart {
     int boardModel;
     byte[] prgROM;
     byte[] chrROM;
-    //private byte[] chrRAM; // TODO: Load CHR RAM when adequate
+    byte[] chrRAM; // TODO: Load CHR RAM when adequate
 
     public static Cart fromROMFile(String romFilePath) throws IOException {
         byte[] romFileData = Files.readAllBytes(Path.of(romFilePath));
@@ -43,6 +43,7 @@ public class Cart {
 
         if (chrROMSize > 0) {
             cart.chrROM = Arrays.copyOfRange(romFileData, prgEndByte + 1, prgEndByte + chrROMSize + 1);
+            cart.chrRAM = new byte[0];
         }
 
         return cart;

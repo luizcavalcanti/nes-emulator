@@ -5,8 +5,8 @@ public class MMU {
     private MMU() {
     }
 
-    private static final int INTIAL_CART_PRG_ROM_ADDRESS = 0x8000;
-    private static final int INTIAL_CART_PRG_ROM_MIRROR_ADDRESS = 0xC000;
+    private static final int INITIAL_CART_PRG_ROM_ADDRESS = 0x8000;
+    private static final int INITIAL_CART_PRG_ROM_MIRROR_ADDRESS = 0xC000;
     private static final int WHOLE_MEMORY_SIZE = 0x10001;
     private static final int CPU_RAM_UPPER_LIMIT = 0x1FFF;
     private static final int PPU_PORTS_INITIAL_ADDRESS = 0x2000;
@@ -26,9 +26,9 @@ public class MMU {
         }
 
         for (int i = 0; i < cart.prgROM.length; i++) {
-            memory[INTIAL_CART_PRG_ROM_ADDRESS + i] = (int) cart.prgROM[i];
+            memory[INITIAL_CART_PRG_ROM_ADDRESS + i] = cart.prgROM[i];
             if (mirror) {
-                memory[INTIAL_CART_PRG_ROM_MIRROR_ADDRESS + i] = (int) cart.prgROM[i];
+                memory[INITIAL_CART_PRG_ROM_MIRROR_ADDRESS + i] = cart.prgROM[i];
             }
         }
     }

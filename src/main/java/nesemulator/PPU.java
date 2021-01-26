@@ -16,6 +16,9 @@ public class PPU {
     private static final int CONTROL_BIT_NAME_TABLE_ADDRESS_1 = 1;
     private static final int CONTROL_BIT_NAME_TABLE_ADDRESS_2 = 0;
 
+    private PPU() {
+    }
+
     public static void initialize() {
         control = (byte) 0b00000000;
         oamAddress = (byte) 0b00000000;
@@ -55,6 +58,6 @@ public class PPU {
     }
 
     static boolean isBitSet(byte value, int bitIndex) {
-        return (value & (1 << (bitIndex))) > 0;
+        return ((value & 0xff) & (1 << (bitIndex))) > 0;
     }
 }
