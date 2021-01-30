@@ -61,6 +61,11 @@ public class MMU {
     }
 
     private static boolean isPPUAddress(int address) {
+        // TODO: implement treatment for 0x4014
+        if (address == 0x4014) {
+            System.out.println(">>>> SPRITE MEMORY MAPPING (DMA) NOT IMPLEMENTED <<<<");
+        }
         return address >= PPU_PORTS_INITIAL_ADDRESS && address <= PPU_PORTS_UPPER_ADDRESS;
     }
+
 }

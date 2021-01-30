@@ -27,19 +27,19 @@ class MMUTest {
         int value = 0x1A;
 
         // TODO change when we stop mocking PPU response
-        MMU.writeAddress(0x2003, value);
+        MMU.writeAddress(0x2004, value);
 
-        assertEquals(value, MMU.readAddress(0x2003));
-        assertEquals(value, MMU.readAddress(0x200B));
-        assertEquals(value, MMU.readAddress(0x2013));
-        assertEquals(value, MMU.readAddress(0x202B));
-        assertEquals(value, MMU.readAddress(0x2033));
-        assertEquals(value, MMU.readAddress(0x204B));
-        assertEquals(value, MMU.readAddress(0x2053));
-        assertEquals(value, MMU.readAddress(0x206B));
+        assertEquals(value, MMU.readAddress(0x2004));
+        assertEquals(value, MMU.readAddress(0x200C));
+        assertEquals(value, MMU.readAddress(0x2014));
+        assertEquals(value, MMU.readAddress(0x202C));
+        assertEquals(value, MMU.readAddress(0x2034));
+        assertEquals(value, MMU.readAddress(0x204C));
+        assertEquals(value, MMU.readAddress(0x2054));
+        assertEquals(value, MMU.readAddress(0x206C));
         //...
-        assertEquals(value, MMU.readAddress(0x3FE3));
-        assertEquals(value, MMU.readAddress(0x3FFB));
+        assertEquals(value, MMU.readAddress(0x3FE4));
+        assertEquals(value, MMU.readAddress(0x3FFC));
     }
 
     @Test

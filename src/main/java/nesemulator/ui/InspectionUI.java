@@ -17,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import nesemulator.Cart;
 import nesemulator.MMU;
+import nesemulator.PPU;
 import nesemulator.cpu.CPU;
 import nesemulator.cpu.CPUObserver;
 import nesemulator.cpu.Opcode;
@@ -25,7 +26,7 @@ import java.io.IOException;
 
 public class InspectionUI extends Application implements CPUObserver {
 
-    public static final int REGISTER_FONT_SIZE = 30;
+    public static final int REGISTER_FONT_SIZE = 24;
     public static final Font REGISTER_FONT = Font.font("Monospace", REGISTER_FONT_SIZE);
     public static final int LABELS_FONT_SIZE = 14;
     private ListView<String> logListView;
@@ -35,6 +36,7 @@ public class InspectionUI extends Application implements CPUObserver {
     private Label pLabel;
     private Label pcLabel;
     private Label sLabel;
+    private Label ppuStatusLabel;
     private ListView<String> stackListView;
     private TextField instructionCountField;
 
@@ -79,8 +81,11 @@ public class InspectionUI extends Application implements CPUObserver {
     }
 
     private Pane buildRegistersPane() {
-        var registersLabel = new Label("CPU Registers:");
-        registersLabel.setFont(Font.font(LABELS_FONT_SIZE));
+        var cpuRegistersLabel = new Label("CPU Registers:");
+        cpuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
+
+        var ppuRegistersLabel = new Label("PPU Registers:");
+        ppuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
 
         aLabel = new Label("A:  -");
         aLabel.setFont(REGISTER_FONT);
@@ -94,14 +99,21 @@ public class InspectionUI extends Application implements CPUObserver {
         sLabel.setFont(REGISTER_FONT);
         pLabel = new Label("P:  -");
         pLabel.setFont(REGISTER_FONT);
-        Label pHelpLabel = new Label("    NV1BDIZC");
+        Label pHelpLabel = new Label("    NV-BDIZC");
         pHelpLabel.setFont(REGISTER_FONT);
         pHelpLabel.setPadding(new Insets(-20, 0, 0, 0));
+
+        ppuStatusLabel = new Label("Status: -");
+        ppuStatusLabel.setFont(REGISTER_FONT);
+        Label ppuStatusHelpLabel = new Label("        VSO-----");
+        ppuStatusHelpLabel.setFont(REGISTER_FONT);
+        ppuStatusHelpLabel.setPadding(new Insets(-20, 0, 0, 0));
 
         var fieldsPane = new VBox();
         fieldsPane.setPadding(new Insets(5));
         fieldsPane.setMinWidth(200);
         fieldsPane.setSpacing(10);
+        fieldsPane.getChildren().add(cpuRegistersLabel);
         fieldsPane.getChildren().add(pcLabel);
         fieldsPane.getChildren().add(aLabel);
         fieldsPane.getChildren().add(xLabel);
@@ -110,10 +122,11 @@ public class InspectionUI extends Application implements CPUObserver {
         fieldsPane.getChildren().add(pLabel);
         fieldsPane.getChildren().add(pHelpLabel);
 
-        var registerPane = new BorderPane();
-        registerPane.setTop(registersLabel);
-        registerPane.setCenter(fieldsPane);
-        return registerPane;
+        fieldsPane.getChildren().add(ppuRegistersLabel);
+        fieldsPane.getChildren().add(ppuStatusLabel);
+        fieldsPane.getChildren().add(ppuStatusHelpLabel);
+
+        return fieldsPane;
     }
 
     private Pane buildStackPane() {
@@ -143,6 +156,7 @@ public class InspectionUI extends Application implements CPUObserver {
             MMU.loadCart(cart);
             CPU.addObserver(this);
             CPU.initialize();
+            PPU.initialize();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -158,12 +172,20 @@ public class InspectionUI extends Application implements CPUObserver {
     }
 
     private void updateRegisters() {
+        // CPU
+        pcLabel.setText(String.format("PC: 0x%04X", CPU.getPC()));
         aLabel.setText(String.format("A:  0x%02X", CPU.getA() & 0xFF));
         xLabel.setText(String.format("X:  0x%02X", CPU.getX()));
         yLabel.setText(String.format("Y:  0x%02X", CPU.getY()));
         sLabel.setText(String.format("S:  0x%02X", CPU.getS()));
-        pLabel.setText(String.format("P:  %08d", Integer.parseInt(Integer.toBinaryString(CPU.getP()))));
-        pcLabel.setText(String.format("PC: 0x%04X", CPU.getPC()));
+        pLabel.setText(String.format("P:  %s", intToByteBinary(CPU.getP())));
+
+        // PPU
+        ppuStatusLabel.setText(String.format("Status: %s", intToByteBinary(PPU.inspect(0x2002))));
+    }
+
+    private String intToByteBinary(int value) {
+        return String.format("%8s", Integer.toBinaryString(value & 0xFF)).replace(' ', '0');
     }
 
     private void updateStack() {
@@ -187,13 +209,13 @@ public class InspectionUI extends Application implements CPUObserver {
                 return "";
             case Relative:
             case ZeroPage:
-                return String.format(" $%02X", operands[0]);
+                return String.format(" $%02X", operands[0] & 0xff);
             case Immediate:
-                return String.format(" #$%02X", operands[0]);
+                return String.format(" #$%02X", operands[0] & 0xff);
             case Absolute:
                 return String.format(" $%04X", operands[0]);
             case ZeroPageX:
-                return String.format(" $%02X, X", operands[0]);
+                return String.format(" $%02X, X", operands[0] & 0xff);
             case AbsoluteX:
                 return String.format(" $%04X, X", operands[0]);
             case IndirectY:
