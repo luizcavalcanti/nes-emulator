@@ -13,66 +13,59 @@ class PPUTest {
     }
 
     @Test
-    void initializeShouldResetAllData() {
+    void initializeMustResetAllData() {
         assertEquals(0x00, PPU.control);
         assertEquals(0x00, PPU.oamAddress);
         assertEquals(0x00, PPU.mask);
+        assertEquals(0x00, PPU.oamData);
         assertEquals((byte) 0b10000000, PPU.status);
+        assertEquals(2048, PPU.ram.length);
     }
 
     @Test
-    void writeAddressShouldSetControlByteIfSentToAddress0x2000() {
+    void writeMustSetControlByteIfSentToAddress0x2000() {
         PPU.write(0x2000, (byte) 0xAB);
 
         assertEquals((byte) 0xAB, PPU.control);
     }
 
     @Test
-    void writeAddressShouldSetMaskByteIfSentToAddress0x2001() {
+    void writeMustShouldSetMaskByteIfSentToAddress0x2001() {
         PPU.write(0x2001, (byte) 0xBC);
 
         assertEquals((byte) 0xBC, PPU.mask);
     }
 
     @Test
-    void writeAddressShouldSetOAMAddressByteIfSentToAddress0x2003() {
+    void writeMustSetOAMAddressByteIfSentToAddress0x2003() {
         PPU.write(0x2003, (byte) 0xDE);
 
         assertEquals((byte) 0xDE, PPU.oamAddress);
     }
 
     @Test
-    void readShouldReturnTheControlByteIfRequiredAddressIs0x2000() {
-        assertEquals(0x00, PPU.control);
+    void writeMustSetOAMDataByteAndIncreaseOAMAddressIfAddressIs0x2004() {
+        PPU.oamAddress = 0x12;
+        PPU.write(0x2004, (byte) 0xAB);
 
-        PPU.control = (byte) 0xAA;
-
-        assertEquals((byte) 0xAA, PPU.read(0x2000));
+        assertEquals((byte) 0xAB, PPU.read(0x2004));
+        assertEquals((byte) 0x13, PPU.oamAddress);
     }
 
     @Test
-    void readShouldReturnTheControlByteIfRequiredAddressIs0x2001() {
-        assertEquals(0x00, PPU.mask);
-
-        PPU.mask = (byte) 0xBB;
-
-        assertEquals((byte) 0xBB, PPU.read(0x2001));
-    }
-
-    @Test
-    void readShouldReturnTheStatusByteIfRequiredAddressIs0x2002() {
+    void readMustReturnTheStatusByteIfRequiredAddressIs0x2002() {
         PPU.status = (byte) 0xCC;
 
         assertEquals((byte) 0xCC, PPU.read(0x2002));
     }
 
     @Test
-    void readShouldReturnTheOAMAddressByteIfRequiredAddressIs0x2003() {
-        assertEquals(0x00, PPU.oamAddress);
+    void readMustReturnTheOAMDataByteIfRequiredAddressIs0x2004() {
+        assertEquals(0x00, PPU.mask);
 
-        PPU.oamAddress = (byte) 0xDD;
+        PPU.oamData = (byte) 0xBB;
 
-        assertEquals((byte) 0xDD, PPU.read(0x2003));
+        assertEquals((byte) 0xBB, PPU.read(0x2004));
     }
 
     @Test

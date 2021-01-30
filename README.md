@@ -30,6 +30,5 @@ in java 11 (because reasons).
 
 ### Parking lot
 
-- Fake PPU
 - Interrupts
 - Check for CHR RAM/ROM presence
