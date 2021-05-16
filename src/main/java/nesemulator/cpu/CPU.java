@@ -35,9 +35,13 @@ public class CPU {
     static int pc;
     static int s;
 
-    static int cycleCounter;
+    static int cyclesCounter;
 
     private CPU() {
+    }
+
+    public static int getCyclesCounter() {
+        return CPU.cyclesCounter;
     }
 
     public static int getA() {
@@ -83,7 +87,7 @@ public class CPU {
         pc = INITIAL_PC;
         a = x = y = 0x00; // Registers cleanup
         p = INITIAL_PROCESSOR_STATUS;
-        cycleCounter = 0;
+        cyclesCounter = 0;
     }
 
     public static void execute() {
@@ -109,124 +113,124 @@ public class CPU {
 
         switch (opcode) {
             case BRK:
-                cycleCounter += brk();
+                cyclesCounter += brk();
                 break;
             case ORA_IMMEDIATE:
-                cycleCounter += oraImmediate();
+                cyclesCounter += oraImmediate();
                 break;
             case BPL:
-                cycleCounter += bpl();
+                cyclesCounter += bpl();
                 break;
             case BMI:
-                cycleCounter += bmi();
+                cyclesCounter += bmi();
                 break;
             case JSR:
-                cycleCounter += jsr();
+                cyclesCounter += jsr();
                 break;
             case RTS:
-                cycleCounter += rts();
+                cyclesCounter += rts();
                 break;
             case PHA:
-                cycleCounter += pha();
+                cyclesCounter += pha();
                 break;
             case JMP_ABSOLUTE:
-                cycleCounter += jmpAbsolute();
+                cyclesCounter += jmpAbsolute();
                 break;
             case SEI:
-                cycleCounter += sei();
+                cyclesCounter += sei();
                 break;
             case STY_ZERO_PAGE:
-                cycleCounter += styZeroPage();
+                cyclesCounter += styZeroPage();
                 break;
             case STA_ZERO_PAGE:
-                cycleCounter += staZeroPage();
+                cyclesCounter += staZeroPage();
                 break;
             case STX_ZERO_PAGE:
-                cycleCounter += stxZeroPage();
+                cyclesCounter += stxZeroPage();
                 break;
             case DEY:
-                cycleCounter += dey();
+                cyclesCounter += dey();
                 break;
             case INC_ABSOLUTE:
-                cycleCounter += incAbsolute();
+                cyclesCounter += incAbsolute();
                 break;
             case DEC_ZERO_PAGE:
-                cycleCounter += decZeroPage();
+                cyclesCounter += decZeroPage();
                 break;
 //                case TXA:
 //                    cycleCounter += txa();
 //                    break;
             case STA_ABSOLUTE:
-                cycleCounter += staAbsolute();
+                cyclesCounter += staAbsolute();
                 break;
             case STY_ABSOLUTE:
-                cycleCounter += styAbsolute();
+                cyclesCounter += styAbsolute();
                 break;
             case BCC:
-                cycleCounter += bcc();
+                cyclesCounter += bcc();
                 break;
             case STA_INDIRECT_Y:
-                cycleCounter += staIndirectY();
+                cyclesCounter += staIndirectY();
                 break;
             case STA_ABSOLUTE_Y:
-                cycleCounter += staAbsoluteY();
+                cyclesCounter += staAbsoluteY();
                 break;
             case STA_ZERO_PAGE_X:
-                cycleCounter += staZeroPageX();
+                cyclesCounter += staZeroPageX();
                 break;
             case TYA:
-                cycleCounter += tya();
+                cyclesCounter += tya();
                 break;
             case TAY:
-                cycleCounter += tay();
+                cyclesCounter += tay();
                 break;
             case TXS:
-                cycleCounter += txs();
+                cyclesCounter += txs();
                 break;
             case LDY_IMMEDIATE:
-                cycleCounter += ldyImmediate();
+                cyclesCounter += ldyImmediate();
                 break;
             case LDX_IMMEDIATE:
-                cycleCounter += ldxImmediate();
+                cyclesCounter += ldxImmediate();
                 break;
             case LDA_ZERO_PAGE:
-                cycleCounter += ldaZeroPage();
+                cyclesCounter += ldaZeroPage();
                 break;
             case LDA_IMMEDIATE:
-                cycleCounter += ldaImmediate();
+                cyclesCounter += ldaImmediate();
                 break;
             case LDA_ABSOLUTE:
-                cycleCounter += ldaAbsolute();
+                cyclesCounter += ldaAbsolute();
                 break;
             case LDA_ABSOLUTE_X:
-                cycleCounter += ldaAbsoluteX();
+                cyclesCounter += ldaAbsoluteX();
                 break;
             case CPY_IMMEDIATE:
-                cycleCounter += cpyImmediate();
+                cyclesCounter += cpyImmediate();
                 break;
             case DEX:
-                cycleCounter += dex();
+                cyclesCounter += dex();
                 break;
             case BNE:
-                cycleCounter += bne();
+                cyclesCounter += bne();
                 break;
             case BEQ:
-                cycleCounter += beq();
+                cyclesCounter += beq();
                 break;
             case CLD:
-                cycleCounter += cld();
+                cyclesCounter += cld();
                 break;
             case CMP_ABSOLUTE_X:
-                cycleCounter += cmpAbsoluteX();
+                cyclesCounter += cmpAbsoluteX();
                 break;
             case CMP_IMMEDIATE:
-                cycleCounter += cmpImmediate();
+                cyclesCounter += cmpImmediate();
                 break;
             case INX:
-                cycleCounter += inx();
+                cyclesCounter += inx();
                 break;
             case INY:
-                cycleCounter += iny();
+                cyclesCounter += iny();
                 break;
             default:
                 logger.info(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));

@@ -37,6 +37,7 @@ public class InspectionUI extends Application implements CPUObserver {
     private Label pLabel;
     private Label pcLabel;
     private Label sLabel;
+    private Label cyclesLabel;
     private Label ppuStatusLabel;
     private ListView<String> stackListView;
     private TextField instructionCountField;
@@ -82,10 +83,10 @@ public class InspectionUI extends Application implements CPUObserver {
     }
 
     private Pane buildRegistersPane() {
-        var cpuRegistersLabel = new Label("CPU Registers:");
+        var cpuRegistersLabel = new Label("CPU State:");
         cpuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
 
-        var ppuRegistersLabel = new Label("PPU Registers:");
+        var ppuRegistersLabel = new Label("PPU State:");
         ppuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
 
         aLabel = new Label("A:  -");
@@ -96,6 +97,8 @@ public class InspectionUI extends Application implements CPUObserver {
         yLabel.setFont(REGISTER_FONT);
         pcLabel = new Label("PC: -");
         pcLabel.setFont(REGISTER_FONT);
+        cyclesLabel = new Label("Cycles: 0");
+        cyclesLabel.setFont(REGISTER_FONT);
         sLabel = new Label("S:  -");
         sLabel.setFont(REGISTER_FONT);
         pLabel = new Label("P:  -");
@@ -115,6 +118,7 @@ public class InspectionUI extends Application implements CPUObserver {
         fieldsPane.setMinWidth(200);
         fieldsPane.setSpacing(10);
         fieldsPane.getChildren().add(cpuRegistersLabel);
+        fieldsPane.getChildren().add(cyclesLabel);
         fieldsPane.getChildren().add(pcLabel);
         fieldsPane.getChildren().add(aLabel);
         fieldsPane.getChildren().add(xLabel);
@@ -174,6 +178,7 @@ public class InspectionUI extends Application implements CPUObserver {
 
     private void updateRegisters() {
         // CPU
+        cyclesLabel.setText(String.format("Cycles: %d", CPU.getCyclesCounter()));
         pcLabel.setText(String.format("PC: 0x%04X", CPU.getPC()));
         aLabel.setText(String.format("A:  0x%02X", CPU.getA() & 0xFF));
         xLabel.setText(String.format("X:  0x%02X", CPU.getX()));
