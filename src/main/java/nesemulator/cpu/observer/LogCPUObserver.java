@@ -1,7 +1,6 @@
-package nesemulator;
+package nesemulator.cpu.observer;
 
 import nesemulator.cpu.AddressingMode;
-import nesemulator.cpu.CPUObserver;
 import nesemulator.cpu.Opcode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,36 +15,27 @@ public class LogCPUObserver implements CPUObserver {
         logger.info(String.format("%04X: %s%s (%d cycles)", programCount, opcode.getName(), formattedOperands, cycles));
     }
 
-    private String getFormattedOperands(AddressingMode addressingMode, int[] operands) {
-        String formattedOperands = "";
+    public static String getFormattedOperands(AddressingMode addressingMode, int[] operands) {
         switch (addressingMode) {
             case Implied:
-                break;
+                return "";
             case Relative:
             case ZeroPage:
-                formattedOperands = String.format(" $%02X", operands[0]);
-                break;
+                return String.format(" $%02X", operands[0]);
             case Immediate:
-                formattedOperands = String.format(" #$%02X", operands[0]);
-                break;
+                return String.format(" #$%02X", operands[0]);
             case Absolute:
-                formattedOperands = String.format(" $%04X", operands[0]);
-                break;
+                return String.format(" $%04X", operands[0]);
             case ZeroPageX:
-                formattedOperands = String.format(" $%02X, X", operands[0]);
-                break;
+                return String.format(" $%02X, X", operands[0]);
             case AbsoluteX:
-                formattedOperands = String.format(" $%04X, X", operands[0]);
-                break;
+                return String.format(" $%04X, X", operands[0]);
             case AbsoluteY:
-                formattedOperands = String.format(" $%04X, Y", operands[0]);
-                break;
+                return String.format(" $%04X, Y", operands[0]);
             case IndirectY:
-                formattedOperands = String.format(" ($%04X), Y", operands[0]);
-                break;
+                return String.format(" ($%04X), Y", operands[0]);
             default:
                 throw new UnsupportedOperationException("Please write a log handler for this addressing mode: " + addressingMode.name());
         }
-        return formattedOperands;
     }
 }

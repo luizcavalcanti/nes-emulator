@@ -19,8 +19,9 @@ import nesemulator.Cart;
 import nesemulator.MMU;
 import nesemulator.PPU;
 import nesemulator.cpu.CPU;
-import nesemulator.cpu.CPUObserver;
+import nesemulator.cpu.observer.CPUObserver;
 import nesemulator.cpu.Opcode;
+import nesemulator.cpu.observer.LogCPUObserver;
 
 import java.io.IOException;
 
@@ -198,30 +199,8 @@ public class InspectionUI extends Application implements CPUObserver {
 
     @Override
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {
-        var formattedOperands = getFormattedOperands(opcode, operands);
+        var formattedOperands = LogCPUObserver.getFormattedOperands(opcode.getAddressingMode(), operands);
         var labelText = String.format("%04X: %s%s", programCount, opcode.getName(), formattedOperands);
         logListView.getItems().add(labelText);
-    }
-
-    private String getFormattedOperands(Opcode opcode, int[] operands) {
-        switch (opcode.getAddressingMode()) {
-            case Implied:
-                return "";
-            case Relative:
-            case ZeroPage:
-                return String.format(" $%02X", operands[0] & 0xff);
-            case Immediate:
-                return String.format(" #$%02X", operands[0] & 0xff);
-            case Absolute:
-                return String.format(" $%04X", operands[0]);
-            case ZeroPageX:
-                return String.format(" $%02X, X", operands[0] & 0xff);
-            case AbsoluteX:
-                return String.format(" $%04X, X", operands[0]);
-            case IndirectY:
-                return String.format(" ($%04X), Y", operands[0]);
-            default:
-                throw new UnsupportedOperationException("Please write a log handler for this type of addressing mode: " + opcode.getAddressingMode().name());
-        }
     }
 }

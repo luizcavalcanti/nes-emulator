@@ -1,6 +1,7 @@
 package nesemulator.cpu;
 
 import nesemulator.MMU;
+import nesemulator.cpu.observer.CPUObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
