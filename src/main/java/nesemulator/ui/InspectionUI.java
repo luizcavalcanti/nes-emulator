@@ -2,45 +2,51 @@ package nesemulator.ui;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import nesemulator.Cart;
 import nesemulator.MMU;
 import nesemulator.PPU;
 import nesemulator.cpu.CPU;
-import nesemulator.cpu.observer.CPUObserver;
 import nesemulator.cpu.Opcode;
+import nesemulator.cpu.observer.CPUObserver;
 import nesemulator.cpu.observer.LogCPUObserver;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class InspectionUI extends Application implements CPUObserver {
+public class InspectionUI extends Application implements CPUObserver, Initializable {
 
-    public static final int REGISTER_FONT_SIZE = 24;
-    public static final Font REGISTER_FONT = Font.font("Monospace", REGISTER_FONT_SIZE);
-    public static final int LABELS_FONT_SIZE = 14;
-    private ListView<String> logListView;
-    private Label aLabel;
-    private Label xLabel;
-    private Label yLabel;
-    private Label pLabel;
-    private Label pcLabel;
-    private Label sLabel;
-    private Label cyclesLabel;
-    private Label ppuStatusLabel;
-    private ListView<String> stackListView;
+    @FXML
+    private ListView<String> cpuInstructionsList;
+    @FXML
+    private ListView<String> stackList;
+    @FXML
     private TextField instructionCountField;
+
+    @FXML
+    private Label cyclesLabel;
+    @FXML
+    private Label aLabel;
+    @FXML
+    private Label xLabel;
+    @FXML
+    private Label yLabel;
+    @FXML
+    private Label pLabel;
+    @FXML
+    private Label pcLabel;
+    @FXML
+    private Label sLabel;
+    @FXML
+    private Label ppuStatusLabel;
 
     public static void main(String[] args) {
         launch();
@@ -48,113 +54,21 @@ public class InspectionUI extends Application implements CPUObserver {
 
     @Override
     public void start(Stage stage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/inspectionUI.fxml"));
+        loader.setController(this);
+
         stage.setTitle("NES Emulator - Inpector");
-        stage.setScene(buildScene());
+        stage.setScene(new Scene(loader.load()));
         stage.show();
-        runStuff();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        initStuff();
         updateRegisters();
     }
 
-    private Scene buildScene() {
-        var windowPane = new BorderPane();
-        windowPane.setTop(buildControlsPane());
-        windowPane.setLeft(buildInstructionsPane());
-        windowPane.setCenter(buildRegistersPane());
-        windowPane.setRight(buildStackPane());
-        return new Scene(windowPane, 800, 600); //, 300, 275
-    }
-
-    private Pane buildControlsPane() {
-        var executeButton = new Button("Execute");
-        var instructionsLabel = new Label("Instructions:");
-        instructionsLabel.setFont(Font.font(LABELS_FONT_SIZE));
-        instructionCountField = new TextField("1");
-        instructionCountField.setMaxWidth(60);
-        executeButton.setOnAction(this::handleNextXInstructionsAction);
-
-        var controlsPane = new FlowPane();
-        controlsPane.setPadding(new Insets(10, 0, 10, 0));
-        controlsPane.setHgap(20);
-        controlsPane.setAlignment(Pos.CENTER);
-        controlsPane.getChildren().add(instructionsLabel);
-        controlsPane.getChildren().add(instructionCountField);
-        controlsPane.getChildren().add(executeButton);
-        return controlsPane;
-    }
-
-    private Pane buildRegistersPane() {
-        var cpuRegistersLabel = new Label("CPU State:");
-        cpuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
-
-        var ppuRegistersLabel = new Label("PPU State:");
-        ppuRegistersLabel.setFont(Font.font(LABELS_FONT_SIZE));
-
-        aLabel = new Label("A:  -");
-        aLabel.setFont(REGISTER_FONT);
-        xLabel = new Label("X:  -");
-        xLabel.setFont(REGISTER_FONT);
-        yLabel = new Label("Y:  -");
-        yLabel.setFont(REGISTER_FONT);
-        pcLabel = new Label("PC: -");
-        pcLabel.setFont(REGISTER_FONT);
-        cyclesLabel = new Label("Cycles: 0");
-        cyclesLabel.setFont(REGISTER_FONT);
-        sLabel = new Label("S:  -");
-        sLabel.setFont(REGISTER_FONT);
-        pLabel = new Label("P:  -");
-        pLabel.setFont(REGISTER_FONT);
-        Label pHelpLabel = new Label("    NV-BDIZC");
-        pHelpLabel.setFont(REGISTER_FONT);
-        pHelpLabel.setPadding(new Insets(-20, 0, 0, 0));
-
-        ppuStatusLabel = new Label("Status: -");
-        ppuStatusLabel.setFont(REGISTER_FONT);
-        Label ppuStatusHelpLabel = new Label("        VSO-----");
-        ppuStatusHelpLabel.setFont(REGISTER_FONT);
-        ppuStatusHelpLabel.setPadding(new Insets(-20, 0, 0, 0));
-
-        var fieldsPane = new VBox();
-        fieldsPane.setPadding(new Insets(5));
-        fieldsPane.setMinWidth(200);
-        fieldsPane.setSpacing(10);
-        fieldsPane.getChildren().add(cpuRegistersLabel);
-        fieldsPane.getChildren().add(cyclesLabel);
-        fieldsPane.getChildren().add(pcLabel);
-        fieldsPane.getChildren().add(aLabel);
-        fieldsPane.getChildren().add(xLabel);
-        fieldsPane.getChildren().add(yLabel);
-        fieldsPane.getChildren().add(sLabel);
-        fieldsPane.getChildren().add(pLabel);
-        fieldsPane.getChildren().add(pHelpLabel);
-
-        fieldsPane.getChildren().add(ppuRegistersLabel);
-        fieldsPane.getChildren().add(ppuStatusLabel);
-        fieldsPane.getChildren().add(ppuStatusHelpLabel);
-
-        return fieldsPane;
-    }
-
-    private Pane buildStackPane() {
-        stackListView = new ListView<>();
-        var stackPane = new BorderPane();
-        var stackLabel = new Label("Stack:");
-        stackLabel.setFont(Font.font(LABELS_FONT_SIZE));
-        stackPane.setTop(stackLabel);
-        stackPane.setCenter(stackListView);
-        return stackPane;
-    }
-
-    private Pane buildInstructionsPane() {
-        logListView = new ListView<>();
-        var instructionsPane = new BorderPane();
-        var instructionsLabel = new Label("Instructions:");
-        instructionsLabel.setFont(Font.font(LABELS_FONT_SIZE));
-        instructionsPane.setTop(instructionsLabel);
-        instructionsPane.setCenter(logListView);
-        return instructionsPane;
-    }
-
-    private void runStuff() {
+    private void initStuff() {
         try {
             String romFileName = "balloon.nes";
             Cart cart = Cart.fromROMFile(romFileName);
@@ -167,6 +81,7 @@ public class InspectionUI extends Application implements CPUObserver {
         }
     }
 
+    @FXML
     private void handleNextXInstructionsAction(ActionEvent event) {
         int instructionsCount = Integer.parseInt(instructionCountField.getText().trim());
         for (int i = 0; i < instructionsCount; i++) {
@@ -196,9 +111,9 @@ public class InspectionUI extends Application implements CPUObserver {
 
     private void updateStack() {
         var memoryAddress = 0x0100 + CPU.getS();
-        stackListView.getItems().clear();
+        stackList.getItems().clear();
         for (int i = memoryAddress; i < 0x0200; i++) {
-            stackListView.getItems().add(String.format("0x%02X", MMU.readAddress(i)));
+            stackList.getItems().add(String.format("0x%02X", MMU.readAddress(i)));
         }
     }
 
@@ -206,6 +121,6 @@ public class InspectionUI extends Application implements CPUObserver {
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {
         var formattedOperands = LogCPUObserver.getFormattedOperands(opcode.getAddressingMode(), operands);
         var labelText = String.format("%04X: %s%s", programCount, opcode.getName(), formattedOperands);
-        logListView.getItems().add(labelText);
+        cpuInstructionsList.getItems().add(labelText);
     }
 }

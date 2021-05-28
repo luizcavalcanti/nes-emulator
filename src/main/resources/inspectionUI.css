@@ -1,0 +1,22 @@
+.label {
+    -fx-font-size: 14px;
+}
+
+.register-value {
+    -fx-font-family: monospace;
+    -fx-font-size: 24px;
+}
+
+.register-help {
+    -fx-padding: -20 0 0 0;
+}
+
+#controls-pane {
+    -fx-padding: 10 0 10 0;
+}
+
+#registers-pane {
+    -fx-padding: 5;
+    -fx-min-width: 200;
+    -fx-spacing: 10;
+}

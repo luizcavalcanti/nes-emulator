@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml">
+    <stylesheets>
+        <URL value="@inspectionUI.css"/>
+    </stylesheets>
+    <BorderPane>
+        <top>
+            <FlowPane hgap="20" alignment="CENTER" id="controls-pane">
+                <Label text="Instructions:"/>
+                <TextField fx:id="instructionCountField" maxWidth="60">
+                    1
+                </TextField>
+                <Button text="Execute" onAction="#handleNextXInstructionsAction"/>
+            </FlowPane>
+        </top>
+
+        <left>
+            <BorderPane>
+                <top>
+                    <Label text="Instructions:"/>
+                </top>
+                <center>
+                    <ListView fx:id="cpuInstructionsList"/>
+                </center>
+            </BorderPane>
+        </left>
+
+        <center>
+            <VBox id="registers-pane">
+                <Label text="CPU State:"/>
+                <Label fx:id="cyclesLabel" text="Cycles: 0" styleClass="register-value"/>
+                <Label fx:id="pcLabel" text="PC: -" styleClass="register-value"/>
+                <Label fx:id="aLabel" text="A:  -" styleClass="register-value"/>
+                <Label fx:id="xLabel" text="X:  -" styleClass="register-value"/>
+                <Label fx:id="yLabel" text="Y:  -" styleClass="register-value"/>
+                <Label fx:id="sLabel" text="S:  -" styleClass="register-value"/>
+                <Label fx:id="pLabel" text="P:  -" styleClass="register-value"/>
+                <Label text="    NV-BDIZC" styleClass="register-value, register-help"/>
+
+                <Label text="PPU State:"/>
+                <Label fx:id="ppuStatusLabel" text="Status: --------" styleClass="register-value"/>
+                <Label text="        VSO-----" styleClass="register-value, register-help"/>
+            </VBox>
+        </center>
+
+        <right>
+            <BorderPane>
+                <top>
+                    <Label text="Stack:"/>
+                </top>
+                <center>
+                    <ListView fx:id="stackList"/>
+                </center>
+            </BorderPane>
+        </right>
+    </BorderPane>
+</AnchorPane>
