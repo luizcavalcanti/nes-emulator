@@ -17,22 +17,22 @@ public class LogCPUObserver implements CPUObserver {
 
     public static String getFormattedOperands(AddressingMode addressingMode, int[] operands) {
         switch (addressingMode) {
-            case Implied:
+            case IMPLIED:
                 return "";
-            case Relative:
-            case ZeroPage:
+            case RELATIVE:
+            case ZERO_PAGE:
                 return String.format(" $%02X", operands[0]);
-            case Immediate:
+            case IMMEDIATE:
                 return String.format(" #$%02X", operands[0]);
-            case Absolute:
+            case ABSOLUTE:
                 return String.format(" $%04X", operands[0]);
-            case ZeroPageX:
+            case ZERO_PAGE_X:
                 return String.format(" $%02X, X", operands[0]);
-            case AbsoluteX:
+            case ABSOLUTE_X:
                 return String.format(" $%04X, X", operands[0]);
-            case AbsoluteY:
+            case ABSOLUTE_Y:
                 return String.format(" $%04X, Y", operands[0]);
-            case IndirectY:
+            case INDIRECT_Y:
                 return String.format(" ($%04X), Y", operands[0]);
             default:
                 throw new UnsupportedOperationException("Please write a log handler for this addressing mode: " + addressingMode.name());
