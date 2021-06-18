@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import nesemulator.Cart;
 import nesemulator.MMU;
@@ -59,6 +59,7 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         loader.setController(this);
 
         stage.setTitle("NES Emulator - Inpector");
+        stage.getIcons().add(new Image("/icon.png"));
         stage.setScene(new Scene(loader.load()));
         stage.show();
     }
