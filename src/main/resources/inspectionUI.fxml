@@ -3,24 +3,41 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml">
+<AnchorPane minHeight="720" minWidth="1280" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@inspectionUI.css"/>
     </stylesheets>
     <BorderPane>
         <top>
-            <FlowPane hgap="20" alignment="CENTER" id="controls-pane">
+            <FlowPane id="controls-pane" alignment="CENTER" hgap="20">
                 <Label text="Instructions:"/>
                 <TextField fx:id="instructionCountField" maxWidth="60">
                     1
                 </TextField>
-                <Button text="Execute" onAction="#handleNextXInstructionsAction"/>
+                <Button onAction="#handleNextXInstructionsAction" text="Execute"/>
             </FlowPane>
         </top>
 
         <left>
-            <BorderPane>
+            <VBox id="registers-pane">
+                <Label text="CPU State:"/>
+                <Label fx:id="cyclesLabel" styleClass="register-value" text="Cycles: 0"/>
+                <Label fx:id="pcLabel" styleClass="register-value" text="PC: -"/>
+                <Label fx:id="aLabel" styleClass="register-value" text="A:  -"/>
+                <Label styleClass="register-value" text="X:  -" fx:id="xLabel"/>
+                <Label fx:id="yLabel" styleClass="register-value" text="Y:  -"/>
+                <Label fx:id="sLabel" styleClass="register-value" text="S:  -"/>
+                <Label fx:id="pLabel" styleClass="register-value" text="P:  -"/>
+                <Label styleClass="register-value, register-help" text="    NV-BDIZC"/>
+
+                <Label text="PPU State:"/>
+                <Label fx:id="ppuStatusLabel" styleClass="register-value" text="Status: --------"/>
+                <Label styleClass="register-value, register-help" text="        VSO-----"/>
+            </VBox>
+        </left>
+
+        <center>
+            <BorderPane prefWidth="800" prefHeight="600">
                 <top>
                     <Label text="Instructions:"/>
                 </top>
@@ -28,24 +45,6 @@
                     <ListView fx:id="cpuInstructionsList"/>
                 </center>
             </BorderPane>
-        </left>
-
-        <center>
-            <VBox id="registers-pane">
-                <Label text="CPU State:"/>
-                <Label fx:id="cyclesLabel" text="Cycles: 0" styleClass="register-value"/>
-                <Label fx:id="pcLabel" text="PC: -" styleClass="register-value"/>
-                <Label fx:id="aLabel" text="A:  -" styleClass="register-value"/>
-                <Label fx:id="xLabel" text="X:  -" styleClass="register-value"/>
-                <Label fx:id="yLabel" text="Y:  -" styleClass="register-value"/>
-                <Label fx:id="sLabel" text="S:  -" styleClass="register-value"/>
-                <Label fx:id="pLabel" text="P:  -" styleClass="register-value"/>
-                <Label text="    NV-BDIZC" styleClass="register-value, register-help"/>
-
-                <Label text="PPU State:"/>
-                <Label fx:id="ppuStatusLabel" text="Status: --------" styleClass="register-value"/>
-                <Label text="        VSO-----" styleClass="register-value, register-help"/>
-            </VBox>
         </center>
 
         <right>

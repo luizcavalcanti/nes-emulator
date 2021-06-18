@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import nesemulator.Cart;
 import nesemulator.MMU;
@@ -16,16 +17,16 @@ import nesemulator.PPU;
 import nesemulator.cpu.CPU;
 import nesemulator.cpu.Opcode;
 import nesemulator.cpu.observer.CPUObserver;
-import nesemulator.cpu.observer.LogCPUObserver;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class InspectionUI extends Application implements CPUObserver, Initializable {
 
     @FXML
-    private ListView<String> cpuInstructionsList;
+    private ListView<Instruction> cpuInstructionsList;
     @FXML
     private ListView<String> stackList;
     @FXML
@@ -64,8 +65,10 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        cpuInstructionsList.setCellFactory(list -> new InstructionListCell());
         initStuff();
-        updateRegisters();
+        dumpProgram();
+        updateAll();
     }
 
     private void initStuff() {
@@ -81,14 +84,53 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         }
     }
 
+    private void dumpProgram() {
+        int[] prg = MMU.getPRGROMData();
+        for (int i = 0; i < prg.length; i++) {
+            int memoryAddress = i + 0x8000;
+            int opcodeNumber = prg[i] & 0xFF;
+            var opcode = Opcode.fromCode(opcodeNumber);
+            int argsLength = opcode.getAddressingMode().getLength();
+
+            int[] instructionArgs = new int[argsLength];
+            for (int j = 0; j < argsLength; j++) {
+                instructionArgs[j] = prg[i + j + 1];
+            }
+
+            Instruction instruction = new Instruction(memoryAddress, opcode, instructionArgs);
+            cpuInstructionsList.getItems().add(instruction);
+
+            i += argsLength;
+        }
+    }
+
     @FXML
     private void handleNextXInstructionsAction(ActionEvent event) {
+        clearDump();
         int instructionsCount = Integer.parseInt(instructionCountField.getText().trim());
         for (int i = 0; i < instructionsCount; i++) {
             CPU.executeStep();
         }
+        updateAll();
+    }
+
+    private void updateAll() {
         updateRegisters();
         updateStack();
+        updateDump();
+    }
+
+    private void clearDump() {
+        Optional<Instruction> selected = cpuInstructionsList.getItems().stream().filter(Instruction::isCurrent).findFirst();
+        selected.ifPresent(instruction -> instruction.setCurrent(false));
+    }
+
+    private void updateDump() {
+        Optional<Instruction> current = cpuInstructionsList.getItems().stream()
+                .filter(instruction -> instruction.getAddress() == CPU.getPC())
+                .findFirst();
+        current.ifPresent(instruction -> instruction.setCurrent(true));
+        cpuInstructionsList.refresh();
     }
 
     private void updateRegisters() {
@@ -113,14 +155,15 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         var memoryAddress = 0x0100 + CPU.getS();
         stackList.getItems().clear();
         for (int i = memoryAddress; i < 0x0200; i++) {
-            stackList.getItems().add(String.format("0x%02X", MMU.readAddress(i)));
+            stackList.getItems().add(String.format("0x%02X", MMU.readAddress(i) & 0xFF));
         }
     }
 
     @Override
     public void notifyCPUInstruction(int programCount, Opcode opcode, int cycles, int... operands) {
-        var formattedOperands = LogCPUObserver.getFormattedOperands(opcode.getAddressingMode(), operands);
-        var labelText = String.format("%04X: %s%s", programCount, opcode.getName(), formattedOperands);
-        cpuInstructionsList.getItems().add(labelText);
+//        var formattedOperands = LogCPUObserver.getFormattedOperands(opcode.getAddressingMode(), operands);
+//        var labelText = String.format("%04X: %s%s", programCount, opcode.getName(), formattedOperands);
+//        cpuInstructionsList.getItems().add(labelText);
     }
 }
+

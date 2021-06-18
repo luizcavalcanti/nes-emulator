@@ -1,5 +1,8 @@
 package nesemulator;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class MMU {
 
     private MMU() {
@@ -54,6 +57,10 @@ public class MMU {
             }
             memory[address] = value;
         }
+    }
+
+    public static int[] getPRGROMData() {
+        return Arrays.copyOfRange(memory, INITIAL_CART_PRG_ROM_ADDRESS, INITIAL_CART_PRG_ROM_ADDRESS + 0x4001);
     }
 
     private static int getMirroredPPUAddress(int address) {
