@@ -8,6 +8,7 @@ public enum AddressingMode {
     ACCUMULATOR(0),
     INDEXED(0), //FIXME: not sure of length
     ZERO_PAGE_X(1),
+    ZERO_PAGE_Y(1),
     INDIRECT(2),
     PRE_INDEXED_INDIRECT(0), //FIXME: not sure of length
     INDIRECT_X(1),
