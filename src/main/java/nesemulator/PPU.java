@@ -63,6 +63,9 @@ public class PPU {
         addressClean = true;
     }
 
+    public static void executeStep(int cpuCycles) {
+    }
+
     public static void write(int address, byte data) {
         switch (address) {
             case ADDRESS_PPUCTRL:

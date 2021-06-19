@@ -23,16 +23,27 @@ public class Main {
             PPU.initialize();
             MMU.initialize();
             CPU.initialize();
-            CPU.addObserver(new LogCPUObserver());
+            if (logger.isDebugEnabled()) {
+                CPU.addObserver(new LogCPUObserver());
+            }
 
             logger.info("Loading {}...", romFileName);
             Cart cart = Cart.fromROMFile(romFileName);
             MMU.loadCart(cart);
 
-            logger.info("Executing...");
-            CPU.execute();
+            runEmulator();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void runEmulator() {
+        long clock = 0;
+        while (true) {
+            System.out.print(String.format("Clock: %d\r", clock));
+            var cpuCycles = CPU.executeStep();
+            PPU.executeStep(cpuCycles);
+            clock += cpuCycles;
         }
     }
 
