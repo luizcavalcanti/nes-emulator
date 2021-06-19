@@ -1,17 +1,17 @@
-package:
-	mvn package
+clean:
+	mvn clean
 
 compile:
 	mvn compile
 
-test:
+package: compile
+	mvn package
+
+test: compile
 	mvn test
 
 ci-test:
 	mvn --batch-mode --update-snapshots verify
-
-clean:
-	mvn clean
 
 inspect: compile
 	mvn exec:java -Dexec.mainClass=nesemulator.ui.InspectionUI -Dexec.args=$(rom)
