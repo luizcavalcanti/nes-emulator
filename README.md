@@ -15,7 +15,7 @@ in java 11 (because reasons).
 
 - Loading iNES 1.0 rom format with some headers
 - Basic mirroring for Cart PRG ROM and CPU RAM addresses
-- A functional CPU with some opcodes (implementing them as needed)
+- A functional CPU with some opcodes (implementing them as needed) + cycle count
 - A functional MMU with most of the memory mirroring needed
 - A vey basic PPU on which you can write and read bytes mindlessly, but does not render stuff yet.
 - Basic inspection GUI for debugging purposes (run `make inspect`)
@@ -24,8 +24,8 @@ in java 11 (because reasons).
 
 ### What I'm working on right now?
 
-- Creating an inspection GUI (javaFX) to understand what's happening in RAM and CPU (visually)
 - PPU Implementation
+- Adding PPU info on debugger/inspector
 - MORE OPCODES! (at least enough to run Balloon Fighter)
 
 ### Parking lot
