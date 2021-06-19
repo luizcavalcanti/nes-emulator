@@ -17,7 +17,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            String romFileName = "balloon.nes";
+            processArgs(args);
 
             logger.info("Initializing Hardware...");
             PPU.initialize();
@@ -35,6 +35,13 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void processArgs(String[] args) {
+        if (args.length < 1) {
+            throw new RuntimeException("You must provide a .nes rom path in the arguments");
+        }
+        romFileName = args[0];
     }
 
     private static void runEmulator() {

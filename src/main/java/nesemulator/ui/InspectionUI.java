@@ -26,6 +26,8 @@ import java.util.ResourceBundle;
 
 public class InspectionUI extends Application implements CPUObserver, Initializable {
 
+    private static String romFileName;
+
     @FXML
     private ListView<Instruction> cpuInstructionsList;
     @FXML
@@ -51,7 +53,15 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     private Label ppuStatusLabel;
 
     public static void main(String[] args) {
-        launch();
+        processArgs(args);
+        launch(args);
+    }
+
+    private static void processArgs(String[] args) {
+        if (args.length < 1) {
+            throw new RuntimeException("You must provide a .nes rom path in the arguments");
+        }
+        romFileName = args[0];
     }
 
     @Override
@@ -75,7 +85,6 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
 
     private void initStuff() {
         try {
-            String romFileName = "balloon.nes";
             Cart cart = Cart.fromROMFile(romFileName);
             MMU.loadCart(cart);
             CPU.addObserver(this);

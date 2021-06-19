@@ -8,8 +8,8 @@ in java 11 (because reasons).
 
 ### How to run?
 
-- For just running a hardcoded cart, `make run`
-- For the Memory and CPU inspector/debugger, `make inspect`
+- Running a ROM in default mode: `make run rom=/path/to/my/rom.nes`
+- Running a ROM in inspector/debugger, `make inspect rom=/path/to/my/rom.nes`
 
 ### What's working so far?
 
