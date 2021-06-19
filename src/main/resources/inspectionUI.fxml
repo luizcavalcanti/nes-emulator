@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
+<?import nesemulator.ui.PPUPane?>
 <AnchorPane minHeight="720" minWidth="1280" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@inspectionUI.css"/>
@@ -30,9 +31,7 @@
                 <Label fx:id="pLabel" styleClass="register-value" text="P:  -"/>
                 <Label styleClass="register-value, register-help" text="    NV-BDIZC"/>
 
-                <Label text="PPU State:"/>
-                <Label fx:id="ppuStatusLabel" styleClass="register-value" text="Status: --------"/>
-                <Label styleClass="register-value, register-help" text="        VSO-----"/>
+                <PPUPane fx:id="ppuPane"/>
             </VBox>
         </left>
 

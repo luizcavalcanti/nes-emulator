@@ -50,7 +50,7 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     @FXML
     private Label sLabel;
     @FXML
-    private Label ppuStatusLabel;
+    private PPUPane ppuPane;
 
     public static void main(String[] args) {
         processArgs(args);
@@ -160,7 +160,7 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         pLabel.setText(String.format("P:  %s", intToByteBinary(CPU.getP())));
 
         // PPU
-        ppuStatusLabel.setText(String.format("Status: %s", intToByteBinary(PPU.inspect(0x2002))));
+        ppuPane.update();
     }
 
     private String intToByteBinary(int value) {
