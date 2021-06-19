@@ -1,6 +1,7 @@
 package nesemulator.ui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -130,7 +131,12 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         Optional<Instruction> current = cpuInstructionsList.getItems().stream()
                 .filter(instruction -> instruction.getAddress() == CPU.getPC())
                 .findFirst();
-        current.ifPresent(instruction -> instruction.setCurrent(true));
+
+        current.ifPresent(instruction -> {
+            instruction.setCurrent(true);
+            Platform.runLater(() -> cpuInstructionsList.scrollTo(instruction));
+        });
+
         cpuInstructionsList.refresh();
     }
 

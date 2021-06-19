@@ -302,6 +302,10 @@ public enum Opcode {
         return name;
     }
 
+    public int getValue() {
+        return value;
+    }
+
     public AddressingMode getAddressingMode() {
         return addressingMode;
     }

@@ -5,13 +5,13 @@ import nesemulator.cpu.Opcode;
 class Instruction {
     private final int address;
     private final Opcode opcode;
-    private final int[] args;
+    private final int[] operands;
     private boolean current;
 
-    public Instruction(int address, Opcode opcode, int[] args) {
+    public Instruction(int address, Opcode opcode, int[] operands) {
         this.address = address;
         this.opcode = opcode;
-        this.args = args;
+        this.operands = operands;
     }
 
     public void setCurrent(boolean current) {
@@ -26,8 +26,8 @@ class Instruction {
         return opcode;
     }
 
-    public int[] getArgs() {
-        return args;
+    public int[] getOperands() {
+        return operands;
     }
 
     public boolean isCurrent() {

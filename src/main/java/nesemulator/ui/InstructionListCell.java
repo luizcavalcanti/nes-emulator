@@ -18,8 +18,7 @@ class InstructionListCell extends ListCell<Instruction> {
 
         HBox box = new HBox();
 
-        var text = String.format("%04X: %s %s", item.getAddress(), item.getOpcode().getName(), getArguments(item));
-        Text lbl = new Text(text);
+        Text lbl = new Text(instructionToString(item));
         lbl.setFont(Font.font(java.awt.Font.MONOSPACED, 18));
 
         if (item.isCurrent()) {
@@ -30,9 +29,19 @@ class InstructionListCell extends ListCell<Instruction> {
         setGraphic(box);
     }
 
-    private String getArguments(Instruction item) {
+    private String instructionToString(Instruction item) {
+        return String.format(
+                "%04X: [%02X]%s %s",
+                item.getAddress(),
+                item.getOpcode().getValue() & 0xFF,
+                item.getOpcode().getName(),
+                getFormattedOperands(item.getOperands())
+        );
+    }
+
+    private String getFormattedOperands(int[] operands) {
         StringBuilder sb = new StringBuilder();
-        for (int arg : item.getArgs()) {
+        for (int arg : operands) {
             String formattedArg = String.format("%02X ", arg & 0xFF);
             sb.append(formattedArg);
         }
