@@ -43,8 +43,13 @@ public class PPU {
     static byte scrollY;
     static int address;
 
-    static boolean scrollClean;
-    static boolean addressClean;
+    protected static boolean scrollClean;
+    protected static boolean addressClean;
+    protected static int clock;
+
+    //- 341 PPU cycles per line;
+    //- 262 lines;
+    //- 60 frames per second.
 
     private PPU() {
     }
@@ -64,6 +69,7 @@ public class PPU {
     }
 
     public static void executeStep(int cpuCycles) {
+        clock += cpuCycles;
     }
 
     public static void write(int address, byte data) {

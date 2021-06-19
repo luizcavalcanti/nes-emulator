@@ -17,7 +17,7 @@ public class Main {
     private static final int kFramesPerSecond = 60;
     private static final long kTicksPerSecond = 4194304;
     private static final int kMillisPerFrame = 1000 / kFramesPerSecond;
-    private static final long kTicksPerFrame = kTicksPerSecond / kFramesPerSecond;
+    private static final long ticksPerFrame = kTicksPerSecond / kFramesPerSecond;
 
     private static String romFileName;
 
@@ -54,9 +54,16 @@ public class Main {
         long clock = 0;
         while (true) {
             System.out.print(String.format("Clock: %d\r", clock));
+
             var cpuCycles = CPU.executeStep();
             PPU.executeStep(cpuCycles);
             clock += cpuCycles;
+
+            if (clock >= ticksPerFrame) {
+                clock -= ticksPerFrame;
+                // read input
+                // render screen
+            }
         }
     }
 
