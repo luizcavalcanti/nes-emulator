@@ -328,8 +328,10 @@ public class CPU {
 
     static int jmpAbsolute() {
         final int cycles = 3;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        notifyInstruction(Opcode.JMP_ABSOLUTE, cycles, address);
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
+        notifyInstruction(Opcode.JMP_ABSOLUTE, cycles, operand1, operand2);
 
         pc = address;
 
@@ -370,9 +372,11 @@ public class CPU {
 
     static int ldaAbsolute() {
         final int cycles = 4;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.LDA_ABSOLUTE, cycles, address);
+        notifyInstruction(Opcode.LDA_ABSOLUTE, cycles, operand1, operand2);
 
         a = MMU.readAddress(address) & 0xff;
         setNonPositiveFlags((byte) a);
@@ -383,9 +387,11 @@ public class CPU {
 
     static int ldaAbsoluteX() {
         final int cycles = 4;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, address);
+        notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, operand1, operand2);
 
         a = MMU.readAddress(address + x) & 0xff;
         setNonPositiveFlags((byte) a);
@@ -436,9 +442,11 @@ public class CPU {
 
     static int styAbsolute() {
         final int cycles = 4;
-        int value = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int value = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.STY_ABSOLUTE, cycles, value);
+        notifyInstruction(Opcode.STY_ABSOLUTE, cycles, operand1, operand2);
 
         MMU.writeAddress(value, y);
         pc += 3;
@@ -448,9 +456,11 @@ public class CPU {
 
     static int staAbsolute() {
         final int cycles = 4;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.STA_ABSOLUTE, cycles, address);
+        notifyInstruction(Opcode.STA_ABSOLUTE, cycles, address, operand1, operand2);
 
         MMU.writeAddress(address, a);
         pc += 3;
@@ -460,9 +470,11 @@ public class CPU {
 
     static int staAbsoluteY() {
         final int cycles = 5;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.STA_ABSOLUTE_Y, cycles, address);
+        notifyInstruction(Opcode.STA_ABSOLUTE_Y, cycles, operand1, operand2);
 
         MMU.writeAddress(address + y, a);
         pc += 3;
@@ -535,9 +547,11 @@ public class CPU {
     static int jsr() {
         final int cycles = 6;
 
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.JSR, cycles, address);
+        notifyInstruction(Opcode.JSR, cycles, operand1, operand2);
 
         push2BytesToStack(pc + 3);
 
@@ -589,8 +603,11 @@ public class CPU {
     static int incAbsolute() {
         final int cycles = 6;
 
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
-        notifyInstruction(Opcode.INC_ABSOLUTE, cycles, address);
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
+
+        notifyInstruction(Opcode.INC_ABSOLUTE, cycles, operand1, operand2);
 
         int value = MMU.readAddress(address);
         int newValue = (value + 1) & 0xFF;
@@ -725,9 +742,11 @@ public class CPU {
     static int cmpAbsoluteX() {
         // TODO: add +1 to cycle if page is crossed
         int cycles = 4;
-        int address = littleEndianToInt(MMU.readAddress(pc + 1), MMU.readAddress(pc + 2));
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
 
-        notifyInstruction(Opcode.CMP_ABSOLUTE_X, cycles, address);
+        notifyInstruction(Opcode.CMP_ABSOLUTE_X, cycles, operand1, operand2);
 
         var value = MMU.readAddress(address + x);
 
