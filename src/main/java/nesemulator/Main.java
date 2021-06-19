@@ -13,7 +13,13 @@ public class Main {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
     }
 
-    static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final int kFramesPerSecond = 60;
+    private static final long kTicksPerSecond = 4194304;
+    private static final int kMillisPerFrame = 1000 / kFramesPerSecond;
+    private static final long kTicksPerFrame = kTicksPerSecond / kFramesPerSecond;
+
+    private static String romFileName;
 
     public static void main(String[] args) {
         try {

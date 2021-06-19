@@ -10,7 +10,7 @@ package: compile
 test: compile
 	mvn test
 
-ci-test:
+ci-test: compile
 	mvn --batch-mode --update-snapshots verify
 
 inspect: compile
