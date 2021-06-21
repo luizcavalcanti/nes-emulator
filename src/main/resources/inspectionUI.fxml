@@ -54,6 +54,9 @@
                 <center>
                     <ListView fx:id="stackList"/>
                 </center>
+                <bottom>
+                    <ListView fx:id="zeroPageList"/>
+                </bottom>
             </BorderPane>
         </right>
     </BorderPane>

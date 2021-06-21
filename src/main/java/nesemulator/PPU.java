@@ -1,6 +1,12 @@
 package nesemulator;
 
+import nesemulator.cpu.CPU;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PPU {
+
+    private static final Logger logger = LoggerFactory.getLogger(CPU.class);
 
     public static final int ADDRESS_PPUCTRL = 0x2000;
     public static final int ADDRESS_PPUMASK = 0x2001;

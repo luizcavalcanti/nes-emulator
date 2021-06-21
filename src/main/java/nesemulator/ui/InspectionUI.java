@@ -33,6 +33,8 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     @FXML
     private ListView<String> stackList;
     @FXML
+    private ListView<String> zeroPageList;
+    @FXML
     private TextField instructionCountField;
 
     @FXML
@@ -128,6 +130,7 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     private void updateAll() {
         updateRegisters();
         updateStack();
+        updateZeroPage();
         updateDump();
     }
 
@@ -172,6 +175,14 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
         stackList.getItems().clear();
         for (int i = memoryAddress; i < 0x0200; i++) {
             stackList.getItems().add(String.format("0x%02X", MMU.readAddress(i) & 0xFF));
+        }
+    }
+
+    private void updateZeroPage() {
+        zeroPageList.getItems().clear();
+        for (int i = 0; i < 0xFF; i++) {
+            zeroPageList.getItems()
+                    .add(String.format("[%02X] 0x%02X", i & 0xFF, MMU.readAddress(i) & 0xFF));
         }
     }
 
