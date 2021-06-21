@@ -60,7 +60,7 @@ public class MMU {
     }
 
     public static int[] getPRGROMData() {
-        return Arrays.copyOfRange(memory, INITIAL_CART_PRG_ROM_ADDRESS, INITIAL_CART_PRG_ROM_ADDRESS + 0x4001);
+        return Arrays.copyOfRange(memory, INITIAL_CART_PRG_ROM_ADDRESS, INITIAL_CART_PRG_ROM_ADDRESS + 0x8001);
     }
 
     private static int getMirroredPPUAddress(int address) {
