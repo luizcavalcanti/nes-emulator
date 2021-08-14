@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <?import nesemulator.ui.PPUPane?>
+<?import javafx.scene.image.ImageView?>
 <AnchorPane minHeight="720" minWidth="1280" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@inspectionUI.css"/>
@@ -21,6 +22,7 @@
 
         <left>
             <VBox id="registers-pane">
+                <ImageView fx:id="screenView" fitWidth="320" fitHeight="240"/>
                 <Label text="CPU State:"/>
                 <Label fx:id="cyclesLabel" styleClass="register-value" text="Cycles: 0"/>
                 <Label fx:id="pcLabel" styleClass="register-value" text="PC: -"/>

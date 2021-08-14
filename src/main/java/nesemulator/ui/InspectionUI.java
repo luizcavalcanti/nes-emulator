@@ -2,6 +2,7 @@ package nesemulator.ui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import nesemulator.Cart;
 import nesemulator.MMU;
@@ -36,6 +38,8 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     private ListView<String> zeroPageList;
     @FXML
     private TextField instructionCountField;
+    @FXML
+    private ImageView screenView;
 
     @FXML
     private Label cyclesLabel;
@@ -120,6 +124,8 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     @FXML
     private void handleNextXInstructionsAction(ActionEvent event) {
         clearDump();
+        PPU.render();
+        screenView.setImage(SwingFXUtils.toFXImage(PPU.screen, null));
         int instructionsCount = Integer.parseInt(instructionCountField.getText().trim());
         for (int i = 0; i < instructionsCount; i++) {
             CPU.executeStep();

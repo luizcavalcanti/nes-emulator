@@ -1,12 +1,14 @@
 package nesemulator;
 
-import nesemulator.cpu.CPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class PPU {
 
-    private static final Logger logger = LoggerFactory.getLogger(CPU.class);
+    private static final Logger logger = LoggerFactory.getLogger(PPU.class);
 
     public static final int ADDRESS_PPUCTRL = 0x2000;
     public static final int ADDRESS_PPUMASK = 0x2001;
@@ -18,7 +20,46 @@ public class PPU {
     public static final int ADDRESS_PPUDATA = 0x2007;
     public static final int ADDRESS_OAMDMA = 0x4014;
 
-    private static final int RAM_SIZE = 0x4000;
+    private static final int RAM_SIZE = 0x3F40;
+
+    private static final int INTADDR_PATTERN_TABLE_0_START = 0x0000;
+    private static final int INTADDR_PATTERN_TABLE_0_END = 0x0FFF;
+    private static final int INTADDR_PATTERN_TABLE_1_START = 0x1000;
+    private static final int INTADDR_PATTERN_TABLE_1_END = 0x1FFF;
+
+    private static final int INTADDR_NAMETABLE_0_START = 0x2000;
+    private static final int INTADDR_NAMETABLE_0_END = 0x23FF;
+    private static final int INTADDR_NAMETABLE_1_START = 0x2400;
+    private static final int INTADDR_NAMETABLE_1_END = 0x27FF;
+    private static final int INTADDR_NAMETABLE_2_START = 0x2800;
+    private static final int INTADDR_NAMETABLE_2_END = 0x2BFF;
+    private static final int INTADDR_NAMETABLE_3_START = 0x2C00;
+    private static final int INTADDR_NAMETABLE_3_END = 0x2FFF;
+    private static final int INTADDR_NAMETABLE_MIRROR_1_START = 0x3000;
+    private static final int INTADDR_NAMETABLE_MIRROR_1_END = 0x3EFF;
+
+    private static final int INTADDR_PALETTE_RAM_START = 0x3F00;
+    private static final int INTADDR_UNIVERSAL_BACKGROUND_COLOR = 0x3F00;
+    private static final int INTADDR_BACKGROUND_PALETTE_0_START = 0x3F01;
+    private static final int INTADDR_BACKGROUND_PALETTE_0_END = 0x3F03;
+    private static final int INTADDR_BACKGROUND_PALETTE_1_START = 0x3F05;
+    private static final int INTADDR_BACKGROUND_PALETTE_1_END = 0x3F07;
+    private static final int INTADDR_BACKGROUND_PALETTE_2_START = 0x3F09;
+    private static final int INTADDR_BACKGROUND_PALETTE_2_END = 0x3F0B;
+    private static final int INTADDR_BACKGROUND_PALETTE_3_START = 0x3F0D;
+    private static final int INTADDR_BACKGROUND_PALETTE_3_END = 0x3F0F;
+    private static final int INTADDR_SPRITE_PALETTE_0_START = 0x3F11;
+    private static final int INTADDR_SPRITE_PALETTE_0_END = 0x3F13;
+    private static final int INTADDR_SPRITE_PALETTE_1_START = 0x3F15;
+    private static final int INTADDR_SPRITE_PALETTE_1_END = 0x3F17;
+    private static final int INTADDR_SPRITE_PALETTE_2_START = 0x3F19;
+    private static final int INTADDR_SPRITE_PALETTE_2_END = 0x3F1B;
+    private static final int INTADDR_SPRITE_PALETTE_3_START = 0x3F1D;
+    private static final int INTADDR_SPRITE_PALETTE_3_END = 0x3F1F;
+    private static final int INTADDR_PALETTE_RAM_END = 0x3F1F;
+
+    private static final int INTADDR_NAMETABLE_MIRROR_2_START = 0x3F20;
+    private static final int INTADDR_NAMETABLE_MIRROR_2_END = 0x3FFF;
 
     private static final int CONTROL_BIT_NMI_ENABLE = 7;
     private static final int CONTROL_BIT_PPU_MASTER_SLAVE = 6;
@@ -38,6 +79,10 @@ public class PPU {
     private static final int MASK_BIT_SHOW_BACKGROUND_LEFMOST = 1;
     private static final int MASK_BIT_GREYSCALE = 0;
 
+    private static final int STATUS_BIT_VBLANK = 7;
+    private static final int STATUS_SPRITE_0_HIT = 6;
+    private static final int STATUS_SPRITE_OVERFLOW = 5;
+
     static int[] ram;
 
     static byte control;
@@ -52,6 +97,7 @@ public class PPU {
     protected static boolean scrollClean;
     protected static boolean addressClean;
     protected static int clock;
+    public static BufferedImage screen;
 
     //- 341 PPU cycles per line;
     //- 262 lines;
@@ -79,6 +125,7 @@ public class PPU {
     }
 
     public static void write(int address, byte data) {
+        logger.info(String.format("PPU WRITTEN: $%04X 0x%04X (%s)", address, data, intToByteBinary(data)));
         switch (address) {
             case ADDRESS_PPUCTRL:
                 writeControl(data);
@@ -108,6 +155,7 @@ public class PPU {
     }
 
     public static byte read(final int address) {
+        logger.info(String.format("PPU READ: $%04X", address));
         switch (address) {
             case ADDRESS_PPUSTATUS:
                 return readStatus();
@@ -134,6 +182,16 @@ public class PPU {
             default:
                 throw new UnsupportedOperationException(String.format("You cannot inspect address $%04X on PPU", address));
         }
+    }
+
+    public static void render() {
+        // disable vblank
+        status &= ~(1 << STATUS_BIT_VBLANK);
+        screen = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
+        screen.getGraphics().drawString("NOT REALLY RENDERING",30, 30);
+
+        // re-enable vblank
+        status |= 1 << STATUS_BIT_VBLANK;
     }
 
     private static byte readStatus() {
@@ -179,5 +237,9 @@ public class PPU {
 
     protected static boolean isBitSet(byte value, int bitIndex) {
         return ((value & 0xff) & (1 << (bitIndex))) > 0;
+    }
+
+    private static String intToByteBinary(int value) {
+        return String.format("%8s", Integer.toBinaryString(value & 0xFF)).replace(' ', '0');
     }
 }
