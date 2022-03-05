@@ -20,7 +20,7 @@ public class PPU {
     public static final int ADDRESS_PPUDATA = 0x2007;
     public static final int ADDRESS_OAMDMA = 0x4014;
 
-    private static final int RAM_SIZE = 0x3F40;
+    private static final int RAM_SIZE = 0x4000;
 
     private static final int INTADDR_PATTERN_TABLE_0_START = 0x0000;
     private static final int INTADDR_PATTERN_TABLE_0_END = 0x0FFF;
