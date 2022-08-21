@@ -430,6 +430,22 @@ class CPUTest {
     }
 
     @Test
+    void stxAbsoluteMustStoreRegisterXContentIntoMemory() {
+        CPU.x = 0x99;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABCD, 0x00);
+
+        int cycles = CPU.stxAbsolute();
+
+        assertEquals(4, cycles);
+        assertEquals(0x99, MMU.readAddress(0xABCD));
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
     void stxZeroPageMustStoreRegisterXContentIntoMemoryAddress() {
         int address = 0x99;
         CPU.x = 0xAB;

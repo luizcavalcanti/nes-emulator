@@ -150,6 +150,9 @@ public class CPU {
             case STA_ABSOLUTE:
                 cycles = staAbsolute();
                 break;
+            case STX_ABSOLUTE:
+                cycles = stxAbsolute();
+                break;
             case STY_ABSOLUTE:
                 cycles = styAbsolute();
                 break;
@@ -503,6 +506,20 @@ public class CPU {
 
         MMU.writeAddress(address, a);
         pc += 2;
+
+        return cycles;
+    }
+
+    static int stxAbsolute() {
+        final int cycles = 4;
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
+
+        notifyInstruction(Opcode.STX_ABSOLUTE, cycles, address, operand1, operand2);
+
+        MMU.writeAddress(address, x);
+        pc += 3;
 
         return cycles;
     }
