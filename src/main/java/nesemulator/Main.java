@@ -5,6 +5,8 @@ import nesemulator.cpu.observer.LogCPUObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 
 public class Main {
@@ -51,9 +53,20 @@ public class Main {
     }
 
     private static void runEmulator() {
+        JFrame frame = new JFrame("NES Emulator");
+        frame.getContentPane().setLayout(new FlowLayout());
+
+        var screen = new ImageIcon();
+        var label = new JLabel(screen);
+        frame.getContentPane().add(label);
+        frame.setPreferredSize(new Dimension(266, 280));
+        frame.pack();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
         long clock = 0;
         while (true) {
-            System.out.print(String.format("Clock: %d\r", clock));
+//            System.out.print(String.format("Clock: %d\r", clock));
 
             var cpuCycles = CPU.executeStep();
             PPU.executeStep(cpuCycles);
@@ -63,6 +76,8 @@ public class Main {
                 clock -= ticksPerFrame;
                 // read input
                 // render screen
+                label.setIcon(new ImageIcon(PPU.render()));
+                label.repaint();
             }
         }
     }

@@ -26,8 +26,6 @@ public class CPU {
     private static final int INITIAL_PROCESSOR_STATUS = 0x34;
     private static final int INITIAL_STACK_POINTER = 0xFF;
 
-    private static final Logger logger = LoggerFactory.getLogger(CPU.class);
-
     static int a;
     static int x;
     static int y;

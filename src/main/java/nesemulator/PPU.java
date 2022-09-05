@@ -3,7 +3,6 @@ package nesemulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class PPU {
@@ -21,6 +20,7 @@ public class PPU {
     public static final int ADDRESS_OAMDMA = 0x4014;
 
     private static final int RAM_SIZE = 0x4000;
+    private static final int CPU_CYCLES_PER_FRAME = 1000; //TODO Check
 
     private static final int INTADDR_PATTERN_TABLE_0_START = 0x0000;
     private static final int INTADDR_PATTERN_TABLE_0_END = 0x0FFF;
@@ -99,6 +99,8 @@ public class PPU {
     protected static int clock;
     public static BufferedImage screen;
 
+    private static long framesRendered;
+
     //- 341 PPU cycles per line;
     //- 262 lines;
     //- 60 frames per second.
@@ -122,6 +124,11 @@ public class PPU {
 
     public static void executeStep(int cpuCycles) {
         clock += cpuCycles;
+        if (clock >= CPU_CYCLES_PER_FRAME) {
+            clock = 0;
+            BufferedImage backBuffer = render();
+            screen = backBuffer;
+        }
     }
 
     public static void write(int address, byte data) {
@@ -155,7 +162,7 @@ public class PPU {
     }
 
     public static byte read(final int address) {
-        logger.info(String.format("PPU READ: $%04X", address));
+        logger.debug(String.format("PPU READ: $%04X", address));
         switch (address) {
             case ADDRESS_PPUSTATUS:
                 return readStatus();
@@ -184,14 +191,19 @@ public class PPU {
         }
     }
 
-    public static void render() {
+    public static BufferedImage render() {
         // disable vblank
         status &= ~(1 << STATUS_BIT_VBLANK);
-        screen = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
-        screen.getGraphics().drawString("NOT REALLY RENDERING",30, 30);
+
+        // Render
+        framesRendered++;
+        BufferedImage buffer = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
+        buffer.getGraphics().drawString("NOT REALLY RENDERING: " + framesRendered, 30, 30);
 
         // re-enable vblank
         status |= 1 << STATUS_BIT_VBLANK;
+
+        return buffer;
     }
 
     private static byte readStatus() {
