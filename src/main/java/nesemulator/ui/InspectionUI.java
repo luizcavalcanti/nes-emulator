@@ -124,12 +124,16 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     @FXML
     private void handleNextXInstructionsAction(ActionEvent event) {
         clearDump();
-        PPU.render();
-        screenView.setImage(SwingFXUtils.toFXImage(PPU.screen, null));
+
         int instructionsCount = Integer.parseInt(instructionCountField.getText().trim());
         for (int i = 0; i < instructionsCount; i++) {
-            CPU.executeStep();
+            int cpuCycles = CPU.executeStep();
+            PPU.executeStep(cpuCycles);
         }
+
+        if (PPU.screen != null)
+            screenView.setImage(SwingFXUtils.toFXImage(PPU.screen, null));
+
         updateAll();
     }
 

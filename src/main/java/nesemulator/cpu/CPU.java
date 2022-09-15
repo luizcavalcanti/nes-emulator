@@ -243,7 +243,7 @@ public class CPU {
         // TODO: Cycles: +2 if to a new page
         var cycles = 2;
         var offset = 2;
-        final int value = MMU.readAddress(pc + 1);
+        final byte value = (byte) MMU.readAddress(pc + 1);
         if (isStatusFlagSet(STATUS_FLAG_NEGATIVE)) {
             cycles += 1;
             offset += value;

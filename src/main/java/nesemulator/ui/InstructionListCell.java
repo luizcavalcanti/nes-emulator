@@ -7,6 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import nesemulator.cpu.CPUFormatter;
 
 class InstructionListCell extends ListCell<Instruction> {
 
@@ -35,16 +36,8 @@ class InstructionListCell extends ListCell<Instruction> {
                 item.getAddress(),
                 item.getOpcode().getValue() & 0xFF,
                 item.getOpcode().getName(),
-                getFormattedOperands(item.getOperands())
+                CPUFormatter.getFormattedOperands(item.getOpcode().getAddressingMode(), item.getOperands())
         );
     }
 
-    private String getFormattedOperands(int[] operands) {
-        StringBuilder sb = new StringBuilder();
-        for (int arg : operands) {
-            String formattedArg = String.format("%02X ", arg & 0xFF);
-            sb.append(formattedArg);
-        }
-        return sb.toString();
-    }
 }

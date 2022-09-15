@@ -22,11 +22,23 @@ public class PPU {
     private static final int RAM_SIZE = 0x4000;
     private static final int CPU_CYCLES_PER_FRAME = 1000; //TODO Check
 
+//$0000-$0FFF 	$1000 	Pattern table 0
+//$1000-$1FFF 	$1000 	Pattern table 1
+//$2000-$23FF 	$0400 	Nametable 0
+//$2400-$27FF 	$0400 	Nametable 1
+//$2800-$2BFF 	$0400 	Nametable 2
+//$2C00-$2FFF 	$0400 	Nametable 3
+//$3000-$3EFF 	$0F00 	Mirrors of $2000-$2EFF
+//$3F00-$3F1F 	$0020 	Palette RAM indexes
+//$3F20-$3FFF 	$00E0 	Mirrors of $3F00-$3F1F
+
+    // Pattern tables
     private static final int INTADDR_PATTERN_TABLE_0_START = 0x0000;
     private static final int INTADDR_PATTERN_TABLE_0_END = 0x0FFF;
     private static final int INTADDR_PATTERN_TABLE_1_START = 0x1000;
     private static final int INTADDR_PATTERN_TABLE_1_END = 0x1FFF;
 
+    // Nametables
     private static final int INTADDR_NAMETABLE_0_START = 0x2000;
     private static final int INTADDR_NAMETABLE_0_END = 0x23FF;
     private static final int INTADDR_NAMETABLE_1_START = 0x2400;
@@ -35,9 +47,12 @@ public class PPU {
     private static final int INTADDR_NAMETABLE_2_END = 0x2BFF;
     private static final int INTADDR_NAMETABLE_3_START = 0x2C00;
     private static final int INTADDR_NAMETABLE_3_END = 0x2FFF;
-    private static final int INTADDR_NAMETABLE_MIRROR_1_START = 0x3000;
-    private static final int INTADDR_NAMETABLE_MIRROR_1_END = 0x3EFF;
+    private static final int INTADDR_NAMETABLE_0_MIRROR_START = 0x3000;
+    private static final int INTADDR_NAMETABLE_0_MIRROR_END = 0x3EFF;
+    private static final int INTADDR_NAMETABLE_MIRROR_2_START = 0x3F20;
+    private static final int INTADDR_NAMETABLE_MIRROR_2_END = 0x3FFF;
 
+    // Pallete RAM
     private static final int INTADDR_PALETTE_RAM_START = 0x3F00;
     private static final int INTADDR_UNIVERSAL_BACKGROUND_COLOR = 0x3F00;
     private static final int INTADDR_BACKGROUND_PALETTE_0_START = 0x3F01;
@@ -57,9 +72,6 @@ public class PPU {
     private static final int INTADDR_SPRITE_PALETTE_3_START = 0x3F1D;
     private static final int INTADDR_SPRITE_PALETTE_3_END = 0x3F1F;
     private static final int INTADDR_PALETTE_RAM_END = 0x3F1F;
-
-    private static final int INTADDR_NAMETABLE_MIRROR_2_START = 0x3F20;
-    private static final int INTADDR_NAMETABLE_MIRROR_2_END = 0x3FFF;
 
     private static final int CONTROL_BIT_NMI_ENABLE = 7;
     private static final int CONTROL_BIT_PPU_MASTER_SLAVE = 6;
@@ -94,6 +106,8 @@ public class PPU {
     static byte scrollY;
     static int address;
 
+    static long frames;
+
     protected static boolean scrollClean;
     protected static boolean addressClean;
     protected static int clock;
@@ -122,6 +136,9 @@ public class PPU {
         addressClean = true;
     }
 
+    private static final int framesPerSecond = 60;
+    private static final long ticksPerSecond = 5_369_318;
+    private static final long ticksPerFrame = ticksPerSecond / framesPerSecond;
     public static void executeStep(int cpuCycles) {
         clock += cpuCycles;
         if (clock >= CPU_CYCLES_PER_FRAME) {
@@ -155,7 +172,8 @@ public class PPU {
             case ADDRESS_PPUDATA:
                 writePPUData(data);
                 break;
-//            TODO: case ADDRESS_OAMDMA: writeOAMDMA(data);
+            case ADDRESS_OAMDMA:
+                writeOAMDMA(data);
             default:
                 throw new UnsupportedOperationException(String.format("You cannot write address $%04X on PPU", address));
         }
@@ -192,18 +210,24 @@ public class PPU {
     }
 
     public static BufferedImage render() {
-        // disable vblank
-        status &= ~(1 << STATUS_BIT_VBLANK);
+        unsetVBlank();
 
         // Render
         framesRendered++;
         BufferedImage buffer = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
         buffer.getGraphics().drawString("NOT REALLY RENDERING: " + framesRendered, 30, 30);
 
-        // re-enable vblank
-        status |= 1 << STATUS_BIT_VBLANK;
+        setVBlank();
 
         return buffer;
+    }
+
+    private static void setVBlank() {
+        status |= 1 << STATUS_BIT_VBLANK;
+    }
+
+    private static void unsetVBlank() {
+        status &= ~(1 << STATUS_BIT_VBLANK);
     }
 
     private static byte readStatus() {
@@ -219,6 +243,12 @@ public class PPU {
     private static void writeOAMData(byte data) {
         oamData = data;
         oamAddress++;
+    }
+
+    private static void writeOAMDMA(byte data) {
+        logger.info("Write OAM DMA");
+//        oamData = data;
+//        oamAddress++;
     }
 
     private static void writeScroll(byte data) {

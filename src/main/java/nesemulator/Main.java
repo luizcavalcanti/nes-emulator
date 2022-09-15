@@ -2,6 +2,7 @@ package nesemulator;
 
 import nesemulator.cpu.CPU;
 import nesemulator.cpu.observer.LogCPUObserver;
+import nesemulator.ui.ScreenUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,13 @@ public class Main {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static final int kFramesPerSecond = 60;
-    private static final long kTicksPerSecond = 4194304;
-    private static final int kMillisPerFrame = 1000 / kFramesPerSecond;
-    private static final long ticksPerFrame = kTicksPerSecond / kFramesPerSecond;
+    private static final int framesPerSecond = 60;
+    private static final long cpuTicksPerSecond = 1_789_773; //4194304
+    private static final int kMillisPerFrame = 1000 / framesPerSecond;
+    private static final long cpuTicksPerFrame = cpuTicksPerSecond / framesPerSecond;
 
     private static String romFileName;
+    private static boolean running;
 
     public static void main(String[] args) {
         try {
@@ -53,31 +55,40 @@ public class Main {
     }
 
     private static void runEmulator() {
-        JFrame frame = new JFrame("NES Emulator");
-        frame.getContentPane().setLayout(new FlowLayout());
-
-        var screen = new ImageIcon();
-        var label = new JLabel(screen);
-        frame.getContentPane().add(label);
-        frame.setPreferredSize(new Dimension(266, 280));
-        frame.pack();
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        JFrame frame = new JFrame("NES Emulator");
+//        frame.getContentPane().setLayout(new FlowLayout());
+//
+//        var screen = new ImageIcon();
+//        var label = new JLabel(screen);
+//        frame.getContentPane().add(label);
+//        frame.setPreferredSize(new Dimension(266, 280));
+//        frame.pack();
+//        frame.setVisible(true);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//
+//        long clock = 0;
+//        while (true) {
+//            System.out.print(String.format("Clock: %d\r", clock));
+        ScreenUI ui = new ScreenUI("NES Emulator - " + romFileName);
+        ui.setVisible(true);
+        ui.pack();
 
         long clock = 0;
-        while (true) {
-//            System.out.print(String.format("Clock: %d\r", clock));
+        running = true;
+        while (running) {
+//            logger.debug(String.format("Clock: %d \tFrames: %d\r", clock, PPU.frames));
 
             var cpuCycles = CPU.executeStep();
             PPU.executeStep(cpuCycles);
             clock += cpuCycles;
 
-            if (clock >= ticksPerFrame) {
-                clock -= ticksPerFrame;
+            if (clock >= cpuTicksPerFrame) {
+                clock -= cpuTicksPerFrame;
                 // read input
                 // render screen
-                label.setIcon(new ImageIcon(PPU.render()));
-                label.repaint();
+//                label.setIcon(new ImageIcon(PPU.render()));
+//                label.repaint();
+                ui.updateScreen(PPU.screen);
             }
         }
     }
