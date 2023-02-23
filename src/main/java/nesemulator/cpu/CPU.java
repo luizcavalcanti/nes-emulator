@@ -142,9 +142,9 @@ public class CPU {
             case DEC_ZERO_PAGE:
                 cycles = decZeroPage();
                 break;
-//                case TXA:
-//                    cycleCounter += txa();
-//                    break;
+            case TXA:
+                cycles += txa();
+                break;
             case STA_ABSOLUTE:
                 cycles = staAbsolute();
                 break;
@@ -159,6 +159,9 @@ public class CPU {
                 break;
             case STA_INDIRECT_Y:
                 cycles = staIndirectY();
+                break;
+            case STA_ABSOLUTE_X:
+                cycles = staAbsoluteX();
                 break;
             case STA_ABSOLUTE_Y:
                 cycles = staAbsoluteY();
@@ -193,6 +196,9 @@ public class CPU {
             case LDA_ABSOLUTE_X:
                 cycles = ldaAbsoluteX();
                 break;
+            case LDA_ABSOLUTE_Y:
+                cycles = ldaAbsoluteY();
+                break;
             case CPY_IMMEDIATE:
                 cycles = cpyImmediate();
                 break;
@@ -204,6 +210,9 @@ public class CPU {
                 break;
             case BEQ:
                 cycles = beq();
+                break;
+            case CLC:
+                cycles = clc();
                 break;
             case CLD:
                 cycles = cld();
@@ -337,14 +346,17 @@ public class CPU {
         return cycles;
     }
 
-//    private static void txa() {
-//        final int cycles = 2;
-//
-//        notifyInstruction(Opcode.TXA, cycles);
-//
-//        a = x;
-//        pc += 1;
-//    }
+    static int txa() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.TXA, cycles);
+
+        a = x;
+        setNonPositiveFlags((byte) a);
+        pc += 1;
+
+        return cycles;
+    }
 
     static int tya() {
         final int cycles = 2;
@@ -382,6 +394,21 @@ public class CPU {
         notifyInstruction(Opcode.LDA_ABSOLUTE_X, cycles, operand1, operand2);
 
         a = MMU.readAddress(address + x) & 0xff;
+        setNonPositiveFlags((byte) a);
+        pc += 3;
+
+        return cycles;
+    }
+
+    static int ldaAbsoluteY() {
+        final int cycles = 4;
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
+
+        notifyInstruction(Opcode.LDA_ABSOLUTE_Y, cycles, operand1, operand2);
+
+        a = MMU.readAddress(address + y) & 0xff;
         setNonPositiveFlags((byte) a);
         pc += 3;
 
@@ -451,6 +478,20 @@ public class CPU {
         notifyInstruction(Opcode.STA_ABSOLUTE, cycles, address, operand1, operand2);
 
         MMU.writeAddress(address, a);
+        pc += 3;
+
+        return cycles;
+    }
+
+    static int staAbsoluteX() {
+        final int cycles = 5;
+        int operand1 = MMU.readAddress(pc + 1);
+        int operand2 = MMU.readAddress(pc + 2);
+        int address = littleEndianToInt(operand1, operand2);
+
+        notifyInstruction(Opcode.STA_ABSOLUTE_X, cycles, operand1, operand2);
+
+        MMU.writeAddress(address + x, a);
         pc += 3;
 
         return cycles;
@@ -653,6 +694,17 @@ public class CPU {
         notifyInstruction(Opcode.BEQ, cycles, value);
 
         pc += offset;
+
+        return cycles;
+    }
+
+    static int clc() {
+        final int cycles = 2;
+
+        notifyInstruction(Opcode.CLC, cycles);
+
+        unsetStatusFlag(STATUS_FLAG_CARRY);
+        pc += 1;
 
         return cycles;
     }

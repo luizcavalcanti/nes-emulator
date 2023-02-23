@@ -55,20 +55,6 @@ public class Main {
     }
 
     private static void runEmulator() {
-//        JFrame frame = new JFrame("NES Emulator");
-//        frame.getContentPane().setLayout(new FlowLayout());
-//
-//        var screen = new ImageIcon();
-//        var label = new JLabel(screen);
-//        frame.getContentPane().add(label);
-//        frame.setPreferredSize(new Dimension(266, 280));
-//        frame.pack();
-//        frame.setVisible(true);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//        long clock = 0;
-//        while (true) {
-//            System.out.print(String.format("Clock: %d\r", clock));
         ScreenUI ui = new ScreenUI("NES Emulator - " + romFileName);
         ui.setVisible(true);
         ui.pack();

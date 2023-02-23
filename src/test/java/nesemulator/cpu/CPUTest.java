@@ -120,6 +120,23 @@ class CPUTest {
     }
 
     @Test
+    void staAbsoluteXMustStoreTheAccumulatorContentIntoMemoryOffsetByX() {
+        CPU.a = 0x99;
+        CPU.x = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABCD, 0x00);
+
+        int cycles = CPU.staAbsoluteX();
+
+        assertEquals(5, cycles);
+        assertEquals(0x99, MMU.readAddress(0xABD0));
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
     void staAbsoluteYMustStoreTheAccumulatorContentIntoMemoryOffsetByY() {
         CPU.a = 0x99;
         CPU.y = 0x03;
@@ -295,6 +312,23 @@ class CPUTest {
     }
 
     @Test
+    void clcMustClearCarryFlag() {
+        CPU.pc = 0x00;
+        CPU.setStatusFlag(CPU.STATUS_FLAG_CARRY);
+
+        int cycles = CPU.clc();
+        assertEquals(2, cycles);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertEquals(0x01, CPU.pc);
+
+        // make sure is idempotent
+        cycles = CPU.clc();
+        assertEquals(2, cycles);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_CARRY));
+        assertEquals(0x02, CPU.pc);
+    }
+
+    @Test
     void ldxImmediateMustLoadUnsignedValueToRegisterX() {
         var value = 0x0D;
         CPU.x = 0x00;
@@ -364,6 +398,20 @@ class CPUTest {
         assertEquals(2, cycles);
         assertEquals(0x00AA, CPU.a);
         assertEquals(0x00AA, CPU.y);
+        assertEquals(0x01, CPU.pc);
+    }
+
+    @Test
+    void txaMustSetXRegisterValueToAccumulator() {
+        CPU.x = 0xAA;
+        CPU.a = 0x00;
+        CPU.pc = 0x00;
+
+        int cycles = CPU.txa();
+
+        assertEquals(2, cycles);
+        assertEquals(0x00AA, CPU.x);
+        assertEquals(0x00AA, CPU.a);
         assertEquals(0x01, CPU.pc);
     }
 
@@ -624,6 +672,66 @@ class CPUTest {
         MMU.writeAddress(0xABD0, value);
 
         int cycles = CPU.ldaAbsoluteX();
+
+        assertEquals(4, cycles);
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void ldaAbsoluteYMustLoadUnsignedValueFromMemoryPositionOffsetByYToRegisterA() {
+        var value = 0x0D;
+        CPU.a = 0x00;
+        CPU.y = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        int cycles = CPU.ldaAbsoluteY();
+
+        assertEquals(4, cycles);
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void ldaAbsoluteYMustSetZeroFlagIfValueLoadedToRegisterAIsZero() {
+        var value = 0x00;
+        CPU.a = 0x00;
+        CPU.y = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        int cycles = CPU.ldaAbsoluteY();
+
+        assertEquals(4, cycles);
+        assertEquals(value, CPU.a);
+        assertEquals(0x03, CPU.pc);
+        assertTrue(CPU.isStatusFlagSet(CPU.STATUS_FLAG_ZERO));
+        assertFalse(CPU.isStatusFlagSet(CPU.STATUS_FLAG_NEGATIVE));
+    }
+
+    @Test
+    void ldaAbsoluteYMustSetNegativeFlagIfValueLoadedToRegisterAIsNegative() {
+        var value = 0xC4;
+        CPU.a = 0x00;
+        CPU.y = 0x03;
+        CPU.pc = 0x00;
+
+        MMU.writeAddress(0x01, 0xCD);
+        MMU.writeAddress(0x02, 0xAB);
+        MMU.writeAddress(0xABD0, value);
+
+        int cycles = CPU.ldaAbsoluteY();
 
         assertEquals(4, cycles);
         assertEquals(value, CPU.a);
