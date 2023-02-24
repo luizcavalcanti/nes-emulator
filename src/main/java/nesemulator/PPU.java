@@ -139,6 +139,7 @@ public class PPU {
     private static final int framesPerSecond = 60;
     private static final long ticksPerSecond = 5_369_318;
     private static final long ticksPerFrame = ticksPerSecond / framesPerSecond;
+
     public static void executeStep(int cpuCycles) {
         clock += cpuCycles;
         if (clock >= CPU_CYCLES_PER_FRAME) {
@@ -232,7 +233,9 @@ public class PPU {
 
     private static byte readStatus() {
         // TODO: status manipulation by reading this address (reset flags, etc)
-        return status;
+        var originalStatus = status;
+        unsetVBlank();
+        return originalStatus;
     }
 
     private static void writeControl(byte data) {
