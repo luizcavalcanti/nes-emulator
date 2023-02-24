@@ -187,7 +187,7 @@ public class PPU {
                 return readStatus();
             case ADDRESS_OAMDATA:
                 return oamData;
-//            TODO case ADDRESS_PPUDATA: writePPUData(data);
+            // TODO case ADDRESS_PPUDATA: writePPUData(data);
             default:
                 throw new UnsupportedOperationException(String.format("You cannot read address $%04X on PPU", address));
         }
@@ -217,6 +217,10 @@ public class PPU {
         framesRendered++;
         BufferedImage buffer = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
         buffer.getGraphics().drawString("NOT REALLY RENDERING: " + framesRendered, 30, 30);
+        buffer.getGraphics().drawString(String.format("Nametable: $%04X", getBaseNametableAddress()), 30, 60);
+
+//        buffer.getGraphics().drawString(String.format("$%04X", getBaseNametableAddress()), 30, 90);
+//        logger.info(Arrays.toString(ram));
 
         setVBlank();
 
@@ -250,6 +254,7 @@ public class PPU {
 
     private static void writeOAMDMA(byte data) {
         logger.info("Write OAM DMA");
+        // TODO: write OAM DMA data
 //        oamData = data;
 //        oamAddress++;
     }
@@ -278,6 +283,19 @@ public class PPU {
         int increment = isBitSet(control, CONTROL_BIT_INCREMENT_MODE) ? 32 : 1;
         ram[address] = data & 0xFF;
         address += increment;
+    }
+
+    protected static int getBaseNametableAddress() {
+        switch (control & 0b11) {
+            case 0:
+                return INTADDR_NAMETABLE_0_START;
+            case 1:
+                return INTADDR_NAMETABLE_1_START;
+            case 2:
+                return INTADDR_NAMETABLE_2_START;
+            default:
+                return INTADDR_NAMETABLE_3_START;
+        }
     }
 
     protected static boolean isBitSet(byte value, int bitIndex) {

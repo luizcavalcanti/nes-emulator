@@ -181,4 +181,28 @@ class PPUTest {
         assertTrue(PPU.isBitSet((byte) 0xFF, 6));
         assertTrue(PPU.isBitSet((byte) 0xFF, 7));
     }
+
+    @Test
+    void getBaseNametableAddressShouldReturn$2000IfNametableIs0() {
+        PPU.control = (byte) 0b10000000;
+        assertEquals(0x2000, PPU.getBaseNametableAddress());
+    }
+
+    @Test
+    void getBaseNametableAddressShouldReturn$2400IfNametableIs1() {
+        PPU.control = (byte) 0b10000001;
+        assertEquals(0x2400, PPU.getBaseNametableAddress());
+    }
+
+    @Test
+    void getBaseNametableAddressShouldReturn$2800IfNametableIs2() {
+        PPU.control = (byte) 0b10000010;
+        assertEquals(0x2800, PPU.getBaseNametableAddress());
+    }
+
+    @Test
+    void getBaseNametableAddressShouldReturn$2C00IfNametableIs3() {
+        PPU.control = (byte) 0b10000011;
+        assertEquals(0x2C00, PPU.getBaseNametableAddress());
+    }
 }
