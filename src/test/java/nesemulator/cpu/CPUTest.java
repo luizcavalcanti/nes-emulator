@@ -1297,4 +1297,14 @@ class CPUTest {
         assertEquals(0xAB, MMU.readAddress(0xDEAD));
     }
 
+    @Test
+    void nopMustConsumeTwoCyclesAndIncreaseProgramCountByOne() {
+        CPU.pc = 0x00;
+
+        var cycles = CPU.nop();
+
+        assertEquals(2, cycles);
+        assertEquals(0x01, CPU.pc);
+    }
+
 }

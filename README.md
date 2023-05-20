@@ -19,7 +19,7 @@ in java 11 (because reasons).
 - A functional MMU with most of the memory mirroring needed
 - A vey basic PPU on which you can write and read bytes mindlessly, but does not render stuff yet.
 - Basic inspection GUI for debugging purposes (run `make inspect`)
-- Supported CPU Opcodes so far: 40 of 151
+- Supported CPU Opcodes so far: 45 of 151
 - Supported PPU Addresses so far: 4 of 8
 
 ### What I'm working on right now?
@@ -32,3 +32,5 @@ in java 11 (because reasons).
 
 - Interrupts
 - Check for CHR RAM/ROM presence
+- Sound chip implementation
+- More memory mapping options

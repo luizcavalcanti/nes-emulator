@@ -22,6 +22,8 @@ public class CPUFormatter {
                 return String.format(" $%02X $%02X, X", operands[0] & 0xFF, operands[1] & 0xFF);
             case ABSOLUTE_Y:
                 return String.format(" $%02X $%02X, Y", operands[0] & 0xFF, operands[1] & 0xFF);
+            case INDIRECT:
+                return String.format(" ($%02X $%02X)", operands[0] & 0xFF, operands[1] & 0xFF);
             case INDIRECT_X:
                 return String.format(" ($%02X), X", operands[0] & 0xFF);
             case INDIRECT_Y:

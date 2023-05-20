@@ -229,6 +229,9 @@ public class CPU {
             case INY:
                 cycles = iny();
                 break;
+            case NOP_EA:
+                cycles = nop();
+                break;
             default:
                 throw new RuntimeException(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));
         }
@@ -791,6 +794,11 @@ public class CPU {
         pc += 2;
 
         return cycles;
+    }
+
+    static int nop() {
+        pc += 1;
+        return 2;
     }
 
     static int cmpAbsoluteX() {
