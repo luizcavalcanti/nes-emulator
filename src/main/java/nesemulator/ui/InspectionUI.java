@@ -181,18 +181,19 @@ public class InspectionUI extends Application implements CPUObserver, Initializa
     }
 
     private void updateStack() {
+        var items = stackList.getItems();
         var memoryAddress = 0x0100 + CPU.getS();
-        stackList.getItems().clear();
+        items.clear();
         for (int i = memoryAddress; i < 0x0200; i++) {
-            stackList.getItems().add(String.format("0x%02X", MMU.readAddress(i) & 0xFF));
+            items.add(String.format("0x%02X", MMU.readAddress(i) & 0xFF));
         }
     }
 
     private void updateZeroPage() {
-        zeroPageList.getItems().clear();
+        var items = zeroPageList.getItems();
+        items.clear();
         for (int i = 0; i < 0xFF; i++) {
-            zeroPageList.getItems()
-                    .add(String.format("[%02X] 0x%02X", i & 0xFF, MMU.readAddress(i) & 0xFF));
+            items.add(String.format("[%02X] 0x%02X", i & 0xFF, MMU.readAddress(i) & 0xFF));
         }
     }
 
