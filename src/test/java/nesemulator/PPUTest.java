@@ -183,26 +183,26 @@ class PPUTest {
     }
 
     @Test
-    void getBaseNametableAddressShouldReturn$2000IfNametableIs0() {
+    void getBaseNameTableAddressShouldReturn$2000IfNameTableIs0() {
         PPU.control = (byte) 0b10000000;
-        assertEquals(0x2000, PPU.getBaseNametableAddress());
+        assertEquals(0x2000, PPU.getBaseNameTableAddress());
     }
 
     @Test
-    void getBaseNametableAddressShouldReturn$2400IfNametableIs1() {
+    void getBaseNameTableAddressShouldReturn$2400IfNameTableIs1() {
         PPU.control = (byte) 0b10000001;
-        assertEquals(0x2400, PPU.getBaseNametableAddress());
+        assertEquals(0x2400, PPU.getBaseNameTableAddress());
     }
 
     @Test
-    void getBaseNametableAddressShouldReturn$2800IfNametableIs2() {
+    void getBaseNameTableAddressShouldReturn$2800IfNameTableIs2() {
         PPU.control = (byte) 0b10000010;
-        assertEquals(0x2800, PPU.getBaseNametableAddress());
+        assertEquals(0x2800, PPU.getBaseNameTableAddress());
     }
 
     @Test
-    void getBaseNametableAddressShouldReturn$2C00IfNametableIs3() {
+    void getBaseNameTableAddressShouldReturn$2C00IfNameTableIs3() {
         PPU.control = (byte) 0b10000011;
-        assertEquals(0x2C00, PPU.getBaseNametableAddress());
+        assertEquals(0x2C00, PPU.getBaseNameTableAddress());
     }
 }

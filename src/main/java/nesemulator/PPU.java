@@ -38,19 +38,19 @@ public class PPU {
     private static final int INTADDR_PATTERN_TABLE_1_START = 0x1000;
     private static final int INTADDR_PATTERN_TABLE_1_END = 0x1FFF;
 
-    // Nametables
-    private static final int INTADDR_NAMETABLE_0_START = 0x2000;
-    private static final int INTADDR_NAMETABLE_0_END = 0x23FF;
-    private static final int INTADDR_NAMETABLE_1_START = 0x2400;
-    private static final int INTADDR_NAMETABLE_1_END = 0x27FF;
-    private static final int INTADDR_NAMETABLE_2_START = 0x2800;
-    private static final int INTADDR_NAMETABLE_2_END = 0x2BFF;
-    private static final int INTADDR_NAMETABLE_3_START = 0x2C00;
-    private static final int INTADDR_NAMETABLE_3_END = 0x2FFF;
-    private static final int INTADDR_NAMETABLE_0_MIRROR_START = 0x3000;
-    private static final int INTADDR_NAMETABLE_0_MIRROR_END = 0x3EFF;
-    private static final int INTADDR_NAMETABLE_MIRROR_2_START = 0x3F20;
-    private static final int INTADDR_NAMETABLE_MIRROR_2_END = 0x3FFF;
+    // Name Tables
+    private static final int INTADDR_NAME_TABLE_0_START = 0x2000;
+    private static final int INTADDR_NAME_TABLE_0_END = 0x23FF;
+    private static final int INTADDR_NAME_TABLE_1_START = 0x2400;
+    private static final int INTADDR_NAME_TABLE_1_END = 0x27FF;
+    private static final int INTADDR_NAME_TABLE_2_START = 0x2800;
+    private static final int INTADDR_NAME_TABLE_2_END = 0x2BFF;
+    private static final int INTADDR_NAME_TABLE_3_START = 0x2C00;
+    private static final int INTADDR_NAME_TABLE_3_END = 0x2FFF;
+    private static final int INTADDR_NAME_TABLE_0_MIRROR_START = 0x3000;
+    private static final int INTADDR_NAME_TABLE_0_MIRROR_END = 0x3EFF;
+    private static final int INTADDR_NAME_TABLE_MIRROR_2_START = 0x3F20;
+    private static final int INTADDR_NAME_TABLE_MIRROR_2_END = 0x3FFF;
 
     // Pallete RAM
     private static final int INTADDR_PALETTE_RAM_START = 0x3F00;
@@ -217,9 +217,7 @@ public class PPU {
         framesRendered++;
         BufferedImage buffer = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
         buffer.getGraphics().drawString("NOT REALLY RENDERING: " + framesRendered, 30, 30);
-        buffer.getGraphics().drawString(String.format("Nametable: $%04X", getBaseNametableAddress()), 30, 60);
-
-//        buffer.getGraphics().drawString(String.format("$%04X", getBaseNametableAddress()), 30, 90);
+        buffer.getGraphics().drawString(String.format("Nametable: $%04X", getBaseNameTableAddress()), 30, 60);
 //        logger.info(Arrays.toString(ram));
 
         setVBlank();
@@ -285,16 +283,16 @@ public class PPU {
         address += increment;
     }
 
-    protected static int getBaseNametableAddress() {
+    protected static int getBaseNameTableAddress() {
         switch (control & 0b11) {
             case 0:
-                return INTADDR_NAMETABLE_0_START;
+                return INTADDR_NAME_TABLE_0_START;
             case 1:
-                return INTADDR_NAMETABLE_1_START;
+                return INTADDR_NAME_TABLE_1_START;
             case 2:
-                return INTADDR_NAMETABLE_2_START;
+                return INTADDR_NAME_TABLE_2_START;
             default:
-                return INTADDR_NAMETABLE_3_START;
+                return INTADDR_NAME_TABLE_3_START;
         }
     }
 
