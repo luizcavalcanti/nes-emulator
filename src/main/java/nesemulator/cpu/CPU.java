@@ -2,8 +2,6 @@ package nesemulator.cpu;
 
 import nesemulator.MMU;
 import nesemulator.cpu.observer.CPUObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -229,8 +227,25 @@ public class CPU {
             case INY:
                 cycles = iny();
                 break;
+            case NOP_1A:
+            case NOP_3A:
+            case NOP_5A:
+            case NOP_7A:
+            case NOP_DA:
             case NOP_EA:
+            case NOP_FA:
                 cycles = nop();
+                break;
+            case NOP_ABSOLUTE:
+                cycles = nopAbsolute();
+                break;
+            case NOP_ABSOLUTE_X_1C:
+            case NOP_ABSOLUTE_X_3C:
+            case NOP_ABSOLUTE_X_5C:
+            case NOP_ABSOLUTE_X_7C:
+            case NOP_ABSOLUTE_X_DC:
+            case NOP_ABSOLUTE_X_FC:
+                cycles = nopAbsoluteX();
                 break;
             default:
                 throw new RuntimeException(String.format("%04X: OpCode $%02X not implemented", pc, nextInstruction));
@@ -799,6 +814,17 @@ public class CPU {
     static int nop() {
         pc += 1;
         return 2;
+    }
+
+    static int nopAbsolute() {
+        pc += 3;
+        return 4;
+    }
+
+    static int nopAbsoluteX() {
+        // TODO: add +1 to cycle if page is crossed (it's in the spec, but WTF?!?)
+        pc += 3;
+        return 4;
     }
 
     static int cmpAbsoluteX() {

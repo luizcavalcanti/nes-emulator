@@ -1307,4 +1307,24 @@ class CPUTest {
         assertEquals(0x01, CPU.pc);
     }
 
+    @Test
+    void nopAbsoluteShouldConsumeFourCyclesAndIncreaseProgramCountByThree() {
+        CPU.pc = 0x00;
+
+        var cycles = CPU.nopAbsolute();
+
+        assertEquals(4, cycles);
+        assertEquals(0x03, CPU.pc);
+    }
+
+    @Test
+    void nopAbosluteXConsumeFourCyclesAndIncreaseProgramCountByThree() {
+        CPU.x = 0xa9;
+        CPU.pc = 0x00;
+
+        var cycles = CPU.nopAbsoluteX();
+
+        assertEquals(4, cycles);
+        assertEquals(0x03, CPU.pc);
+    }
 }
