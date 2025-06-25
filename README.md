@@ -4,14 +4,14 @@
 
 I have some trouble understanding how the NES hardware
 (and specially cartridges) works, so I'm building an as-simple-as-I-can emulator to really get it (I'm that dumb)
-in java 11 (because reasons).
+in java (because reasons I'm too dumb to implement desktop rendering in anything but Swing/JavaFX).
 
-### How to run?
+### How to run
 
 - Running a ROM in default mode: `make run rom=/path/to/my/rom.nes`
 - Running a ROM in inspector/debugger, `make inspect rom=/path/to/my/rom.nes`
 
-### What's working so far?
+### What's working so far
 
 - Loading iNES 1.0 rom format with some headers
 - Basic mirroring for Cart PRG ROM and CPU RAM addresses
@@ -19,14 +19,14 @@ in java 11 (because reasons).
 - A functional MMU with most of the memory mirroring needed
 - A vey basic PPU on which you can write and read bytes mindlessly, but does not render stuff yet.
 - Basic inspection GUI for debugging purposes (run `make inspect`)
-- Supported CPU Opcodes so far: 45 of 151
+- Supported CPU Opcodes so far: 58 of 151
 - Supported PPU Addresses so far: 4 of 8
 
-### What I'm working on right now?
+### What I'm working on right now
 
 - PPU Implementation
 - Adding PPU info on debugger/inspector
-- MORE OPCODES! (at least enough to run Balloon Fighter)
+- MORE OPCODES! (at least enough to run simple, early gen games)
 
 ### Parking lot
 
