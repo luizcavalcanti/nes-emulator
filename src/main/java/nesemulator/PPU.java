@@ -140,12 +140,21 @@ public class PPU {
     private static final long ticksPerSecond = 5_369_318;
     private static final long ticksPerFrame = ticksPerSecond / framesPerSecond;
 
+    private static int vblankCycles = 0;
+    private static boolean vblanking = false;
     public static void executeStep(int cpuCycles) {
         clock += cpuCycles;
+        if (vblanking) {
+            vblankCycles += cpuCycles;
+            if (vblankCycles >= 2273) {
+                unsetVBlank();
+            }
+        }
         if (clock >= CPU_CYCLES_PER_FRAME) {
             clock = 0;
             BufferedImage backBuffer = render();
             screen = backBuffer;
+            setVBlank();
         }
     }
 
@@ -181,7 +190,7 @@ public class PPU {
     }
 
     public static byte read(final int address) {
-        logger.debug(String.format("PPU READ: $%04X", address));
+        logger.info(String.format("PPU READ: $%04X", address));
         switch (address) {
             case ADDRESS_PPUSTATUS:
                 return readStatus();
@@ -211,16 +220,11 @@ public class PPU {
     }
 
     public static BufferedImage render() {
-        unsetVBlank();
-
-        // Render
         framesRendered++;
         BufferedImage buffer = new BufferedImage(256, 240, BufferedImage.TYPE_3BYTE_BGR);
         buffer.getGraphics().drawString("NOT REALLY RENDERING: " + framesRendered, 30, 30);
         buffer.getGraphics().drawString(String.format("Nametable: $%04X", getBaseNameTableAddress()), 30, 60);
 //        logger.info(Arrays.toString(ram));
-
-        setVBlank();
 
         return buffer;
     }
@@ -269,15 +273,18 @@ public class PPU {
 
     private static void writeAddress(byte data) {
         if (addressClean) {
+            logger.info(String.format("[PPU] Upper address set: $%04X", data));
             address = (data << 8) & 0xFF00;
             addressClean = false;
         } else {
+            logger.info(String.format("[PPU] Lower address set: $%04X", data));
             address += data & 0xFF;
             addressClean = true;
         }
     }
 
     private static void writePPUData(byte data) {
+        logger.info(String.format("[PPU] Data writtern: $%04X", data));
         int increment = isBitSet(control, CONTROL_BIT_INCREMENT_MODE) ? 32 : 1;
         ram[address] = data & 0xFF;
         address += increment;
